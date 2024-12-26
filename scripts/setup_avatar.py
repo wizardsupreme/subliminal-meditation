@@ -1,6 +1,6 @@
 import os
 import base64
-import requests  # Import at top level
+import requests
 
 def setup_default_avatar():
     """Set up the default avatar for users without profile pictures."""
@@ -15,9 +15,9 @@ def setup_default_avatar():
         print("Downloading default avatar...")
         try:
             url = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=200"
-            response = requests.get(url, timeout=10)  # Add timeout
+            response = requests.get(url, timeout=10)
             response.raise_for_status()
-            with open(avatar_path, 'wb') as f:
+            with open(avatar_path, 'wb', encoding=None) as f:
                 f.write(response.content)
             print("Default avatar downloaded successfully!")
         except Exception as e:
@@ -29,7 +29,7 @@ def setup_default_avatar():
 def create_default_avatar(path):
     """Create a default avatar from base64 string."""
     try:
-        with open(path, 'wb') as f:
+        with open(path, 'wb', encoding=None) as f:
             f.write(base64.b64decode(DEFAULT_AVATAR_BASE64))
         print("Created default avatar from base64 backup")
     except Exception as e:
