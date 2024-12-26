@@ -8,7 +8,10 @@ from datetime import datetime
 bp = Blueprint('auth', __name__)
 
 def init_firebase(app):
-    cred = credentials.Certificate(app.config['FIREBASE_ADMIN_SDK_PATH'])
+    if app.config.get('FIREBASE_ADMIN_CREDENTIALS'):
+        cred = credentials.Certificate(app.config['FIREBASE_ADMIN_CREDENTIALS'])
+    else:
+        cred = credentials.Certificate(app.config['FIREBASE_ADMIN_SDK_PATH'])
     firebase_admin.initialize_app(cred)
 
 def login_required(f):

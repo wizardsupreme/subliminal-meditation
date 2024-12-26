@@ -1,4 +1,5 @@
 import os
+import json
 from dotenv import load_dotenv
 
 # Only load .env in development
@@ -24,16 +25,8 @@ class Config:
     }
     
     # In production, use environment variables for service account
-    if os.getenv('GAE_ENV', '').startswith('standard'):
-        FIREBASE_ADMIN_CREDENTIALS = {
-            "type": "service_account",
-            "project_id": os.getenv('FIREBASE_PROJECT_ID'),
-            "private_key": os.getenv('FIREBASE_PRIVATE_KEY').replace('\\n', '\n'),
-            "client_email": os.getenv('FIREBASE_CLIENT_EMAIL'),
-            "token_uri": "https://oauth2.googleapis.com/token"
-        }
+    FIREBASE_ADMIN_CREDENTIALS = os.getenv('FIREBASE_ADMIN_CREDENTIALS')
+    if FIREBASE_ADMIN_CREDENTIALS:
+        FIREBASE_ADMIN_CREDENTIALS = json.loads(FIREBASE_ADMIN_CREDENTIALS)
     else:
-        sdk_path = os.path.join('cursor', 'local', 'secrets', 'firebase-admin-sdk.json')
-        if not os.path.exists(sdk_path):
-            sdk_path = 'firebase-admin-sdk.json'
-        FIREBASE_ADMIN_SDK_PATH = sdk_path 
+        FIREBASE_ADMIN_SDK_PATH = 'firebase-admin-sdk.json' 
