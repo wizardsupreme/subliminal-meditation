@@ -1,7 +1,11 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+# Try to load from cursor local secrets first, fall back to regular .env
+env_path = os.path.join('cursor', 'local', 'secrets', '.env')
+if not os.path.exists(env_path):
+    env_path = '.env'
+load_dotenv(env_path)
 
 class Config:
     SECRET_KEY = 'a-long-random-string-used-as-secret-key-12345'
@@ -13,4 +17,8 @@ class Config:
         "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
         "appId": os.getenv('FIREBASE_APP_ID'),
     }
-    FIREBASE_ADMIN_SDK_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'subliminal/firebase-admin-sdk.json') 
+    # Look for Firebase admin SDK in cursor local secrets first
+    sdk_path = os.path.join('cursor', 'local', 'secrets', 'firebase-admin-sdk.json')
+    if not os.path.exists(sdk_path):
+        sdk_path = 'firebase-admin-sdk.json'
+    FIREBASE_ADMIN_SDK_PATH = sdk_path 
