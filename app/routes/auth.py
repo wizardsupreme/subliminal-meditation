@@ -4,6 +4,7 @@ from firebase_admin import auth as firebase_auth
 from firebase_admin import credentials
 from functools import wraps
 from datetime import datetime
+import os
 
 bp = Blueprint('auth', __name__)
 
@@ -11,7 +12,20 @@ def init_firebase(app):
     if app.config.get('FIREBASE_ADMIN_CREDENTIALS'):
         cred = credentials.Certificate(app.config['FIREBASE_ADMIN_CREDENTIALS'])
     else:
-        cred = credentials.Certificate(app.config['FIREBASE_ADMIN_SDK_PATH'])
+        # Construct credentials from environment variables
+        cred_dict = {
+            "type": "service_account",
+            "project_id": app.config['FIREBASE_CONFIG']['projectId'],
+            "private_key_id": os.getenv('FIREBASE_PRIVATE_KEY_ID'),
+            "private_key": os.getenv('FIREBASE_PRIVATE_KEY').replace('\\n', '\n'),
+            "client_email": os.getenv('FIREBASE_CLIENT_EMAIL'),
+            "client_id": os.getenv('FIREBASE_CLIENT_ID'),
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_x509_cert_url": os.getenv('FIREBASE_CLIENT_CERT_URL')
+        }
+        cred = credentials.Certificate(cred_dict)
     firebase_admin.initialize_app(cred)
 
 def login_required(f):
