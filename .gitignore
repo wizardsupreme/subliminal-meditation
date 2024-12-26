@@ -3,9 +3,8 @@ __pycache__/
 *.pyc
 .env
 firebase-admin-sdk.json
-+.idea/
-+.vscode/
-+*.log
-+.DS_Store 
-# Local secrets
+.idea/
+.vscode/
+*.log
+.DS_Store
 cursor/local/secrets/ 
