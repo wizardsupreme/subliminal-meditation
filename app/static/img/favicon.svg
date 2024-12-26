@@ -1,0 +1,9 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .lotus { fill: #8b5cf6; }
+    .center { fill: #7c3aed; }
+  </style>
+  <path class="lotus" d="M16 4c-3 8-9 11-9 16s4 8 9 8 9-3 9-8-6-8-9-16z"/>
+  <path class="lotus" d="M16 4c3 8 9 11 9 16s-4 8-9 8-9-3-9-8 6-8 9-16z"/>
+  <circle class="center" cx="16" cy="20" r="4"/>
+</svg> 
