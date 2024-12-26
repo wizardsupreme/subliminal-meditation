@@ -10,6 +10,7 @@ disable=
     R0913, # too-many-arguments
     W0621, # redefined-outer-name
     W0703, # broad-except
+    R0801, # duplicate-code
 
 [FORMAT]
 max-line-length=120

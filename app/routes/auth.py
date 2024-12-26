@@ -1,10 +1,14 @@
-from flask import Blueprint, redirect, url_for, session, request, render_template, current_app
+from datetime import datetime
+from functools import wraps
+import os
+
+from flask import (
+    Blueprint, redirect, url_for, session,
+    request, render_template
+)
 import firebase_admin
 from firebase_admin import auth as firebase_auth
 from firebase_admin import credentials
-from functools import wraps
-from datetime import datetime
-import os
 
 bp = Blueprint('auth', __name__)
 
@@ -51,12 +55,12 @@ def auth_callback():
     if not id_token:
         print("No ID token received")
         return redirect(url_for('main.index'))
-    
+
     try:
         # Verify the ID token
         decoded_token = firebase_auth.verify_id_token(id_token)
         user_id = decoded_token['uid']
-        
+
         # Get additional user info from Firebase
         user = firebase_auth.get_user(user_id)
         # Debug the user info more thoroughly
@@ -64,7 +68,7 @@ def auth_callback():
         print(f"- Display Name: {user.display_name}")
         print(f"- Email: {user.email}")
         print(f"- Photo URL: {user.photo_url}")
-        
+
         # Store user info in session
         session['user_id'] = user_id
         session['user_name'] = user.display_name or 'User'
@@ -74,7 +78,7 @@ def auth_callback():
         session['user_photo'] = photo_url
         print(f"Final photo URL stored in session: {session['user_photo']}")
         session['last_login'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
+
         print(f"Successfully authenticated user: {user_id}")
         return redirect(url_for('main.dashboard'))
     except Exception as e:
@@ -84,4 +88,4 @@ def auth_callback():
 @bp.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('main.index')) 
+    return redirect(url_for('main.index'))

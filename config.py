@@ -1,5 +1,4 @@
 import os
-import json
 from dotenv import load_dotenv
 
 # Only load .env in development
@@ -22,4 +21,4 @@ class Config:
         "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
         "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
         "appId": os.getenv('FIREBASE_APP_ID'),
-    } 
+    }

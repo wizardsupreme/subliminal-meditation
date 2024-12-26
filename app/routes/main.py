@@ -11,4 +11,4 @@ def index():
 @login_required
 def dashboard():
     print(f"Accessing dashboard. User ID in session: {session.get('user_id')}")
-    return render_template('dashboard.html') 
+    return render_template('dashboard.html')

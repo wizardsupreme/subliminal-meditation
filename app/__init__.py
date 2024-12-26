@@ -8,8 +8,9 @@ def create_app():
 
     init_firebase(app)
 
-    from app.routes import auth, main
+    # Import blueprints at function level to avoid circular imports
+    from app.routes import auth, main  # pylint: disable=import-outside-toplevel
     app.register_blueprint(auth.bp)
     app.register_blueprint(main.bp)
 
-    return app 
+    return app

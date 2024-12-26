@@ -35,4 +35,4 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 with open('app/static/img/favicon.ico', 'wb') as f:
     f.write(base64.b64decode(favicon_data.strip()))
 
-print("Favicon created successfully!") 
+print("Favicon created successfully!")
