@@ -9,6 +9,13 @@ import os
 bp = Blueprint('auth', __name__)
 
 def init_firebase(app):
+    # Debug: Print available environment variables
+    print("Available env vars:", [k for k in os.environ.keys() if k.startswith('FIREBASE')])
+
+    private_key = os.getenv('FIREBASE_PRIVATE_KEY')
+    if not private_key:
+        raise ValueError("FIREBASE_PRIVATE_KEY environment variable is not set")
+
     if app.config.get('FIREBASE_ADMIN_CREDENTIALS'):
         cred = credentials.Certificate(app.config['FIREBASE_ADMIN_CREDENTIALS'])
     else:
@@ -17,7 +24,7 @@ def init_firebase(app):
             "type": "service_account",
             "project_id": app.config['FIREBASE_CONFIG']['projectId'],
             "private_key_id": os.getenv('FIREBASE_PRIVATE_KEY_ID'),
-            "private_key": os.getenv('FIREBASE_PRIVATE_KEY').replace('\\n', '\n'),
+            "private_key": private_key.replace('\\n', '\n'),
             "client_email": os.getenv('FIREBASE_CLIENT_EMAIL'),
             "client_id": os.getenv('FIREBASE_CLIENT_ID'),
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
