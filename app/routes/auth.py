@@ -11,6 +11,10 @@ bp = Blueprint('auth', __name__)
 def init_firebase(app):
     # Debug: Print available environment variables
     print("Available env vars:", [k for k in os.environ.keys() if k.startswith('FIREBASE')])
+    print("Checking /etc/secrets/.env exists:", os.path.exists('/etc/secrets/.env'))
+    if os.path.exists('/etc/secrets/.env'):
+        with open('/etc/secrets/.env') as f:
+            print("Contents of /etc/secrets/.env:", f.read())
 
     private_key = os.getenv('FIREBASE_PRIVATE_KEY')
     if not private_key:
