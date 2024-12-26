@@ -12,26 +12,25 @@
       // Import the functions you need from the SDKs you need
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
       import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
 
       // Your web app's Firebase configuration
       const firebaseConfig = {
-        apiKey: process.env.FIREBASE_API_KEY,
-        authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-        appId: process.env.FIREBASE_APP_ID,
-        measurementId: process.env.FIREBASE_MEASUREMENT_ID
+        apiKey: "AIzaSyCJje8yQsDjGyIno1b-sjx9FnD4Fq7v5s8",
+        authDomain: "subliminal-mediation.firebaseapp.com",
+        projectId: "subliminal-mediation",
+        storageBucket: "subliminal-mediation.firebasestorage.app",
+        messagingSenderId: "103229370513",
+        appId: "1:103229370513:web:841c26f9f1838fc408b1e0",
+        measurementId: "G-J07TH287CZ"
       };
 
       // Initialize Firebase
       const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
       const auth = getAuth(app);
 
       // Make auth functions available globally
       window.signInWithGoogle = async function() {
+        console.log("Sign in with Google clicked");  // Debug log
         const provider = new GoogleAuthProvider();
         try {
           const result = await signInWithPopup(auth, provider);
@@ -39,8 +38,44 @@
           console.log("Got ID token, redirecting to callback");
           window.location.href = `/auth/callback?id_token=${idToken}`;
         } catch (error) {
-          console.error("Error during authentication:", error.code, error.message);
-          alert("Authentication failed: " + error.message);
+          console.error("Firebase Auth Error:", error);
+          let errorMessage = "Authentication failed: ";
+          
+          // Handle specific Firebase Auth errors
+          switch (error.code) {
+            case 'auth/invalid-api-key':
+              errorMessage += "Invalid Firebase API key. Please check your configuration.";
+              break;
+            case 'auth/network-request-failed':
+              errorMessage += "Network error. Please check your internet connection.";
+              break;
+            case 'auth/popup-blocked':
+              errorMessage += "Login popup was blocked. Please allow popups for this site.";
+              break;
+            case 'auth/popup-closed-by-user':
+              errorMessage += "Login popup was closed. Please try again.";
+              break;
+            case 'auth/unauthorized-domain':
+              errorMessage += "This domain is not authorized for Firebase Authentication.";
+              break;
+            default:
+              errorMessage += error.message || "Unknown error occurred.";
+          }
+          
+          // Show error in a more user-friendly way
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'alert alert-danger mt-3';
+          errorDiv.textContent = errorMessage;
+          
+          // Find the login button's parent and insert error after it
+          const loginContainer = document.querySelector('.card-body');
+          if (loginContainer) {
+            loginContainer.appendChild(errorDiv);
+            // Remove the error message after 5 seconds
+            setTimeout(() => errorDiv.remove(), 5000);
+          } else {
+            alert(errorMessage); // Fallback if we can't find the container
+          }
         }
       };
     </script>
