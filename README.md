@@ -5,7 +5,7 @@ A production-ready Flask application template with Firebase Authentication, read
 ## Quick Start with Cursor
 
 1. **Create from Template**
-   - Visit [Flask-Firebase-Template](https://github.com/yourusername/flask-firebase-template)
+   - Visit [Flask-Firebase-Template](https://github.com/wizardsupreme/flask-firebase-template)
    - Click "Use this template" button
    - Name your repository and create it
 
