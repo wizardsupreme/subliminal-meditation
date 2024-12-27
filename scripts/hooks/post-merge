@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+"""
+Git post-merge hook to automatically install new hooks.
+Runs after git pull/merge operations.
+"""
+import os
+import subprocess
+import sys
+import platform
+from typing import Set, List, Tuple
+from hook_utils import GREEN, RESET, print_success, print_error, print_warning, print_info, print_special
+
+# Import notification libraries based on platform
+if platform.system() == 'Windows':
+    try:
+        from win10toast import ToastNotifier
+        TOASTER = ToastNotifier()
+    except ImportError:
+        TOASTER = None
+
+def notify(title: str, message: str) -> None:
+    """Send system notification based on platform."""
+    try:
+        if platform.system() == 'Darwin':  # macOS
+            os.system(f'''
+                osascript -e 'display notification "{message}" with title "{title}"'
+            ''')
+        elif platform.system() == 'Linux':
+            os.system(f'notify-send "{title}" "{message}"')
+        elif platform.system() == 'Windows' and TOASTER:
+            TOASTER.show_toast(title, message, duration=5, threaded=True)
+    except Exception:
+        # Fall back to console if notification fails
+        print(f"\n{title}: {message}")
+
+def verify_hook(hook_path: str) -> Tuple[bool, str]:
+    """Verify that a hook is properly installed and executable."""
+    if not os.path.exists(hook_path):
+        return False, "Hook file not found"
+
+    # Check if file is executable
+    if not os.access(hook_path, os.X_OK):
+        return False, "Hook is not executable"
+
+    # Try running hook with --version or --help to verify it works
+    try:
+        subprocess.run(
+            [hook_path, '--version'],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=True
+        )
+        return True, "Hook verified successfully"
+    except subprocess.TimeoutExpired:
+        return False, "Hook verification timed out"
+    except subprocess.CalledProcessError as e:
+        return False, f"Hook verification failed: {e.stderr}"
+    except Exception as e:
+        return False, f"Hook verification error: {e}"
+
+def verify_all_hooks() -> List[Tuple[str, bool, str]]:
+    """Verify all installed hooks."""
+    git_hooks_dir = os.path.join('.git', 'hooks')
+    results = []
+
+    for hook_name in os.listdir(git_hooks_dir):
+        hook_path = os.path.join(git_hooks_dir, hook_name)
+        if os.path.isfile(hook_path):
+            success, message = verify_hook(hook_path)
+            results.append((hook_name, success, message))
+
+    return results
+
+def get_changed_files() -> Set[str]:
+    """Get files that were changed in the merge."""
+    try:
+        output = subprocess.check_output(
+            ['git', 'diff-tree', '-r', '--name-only', '--no-commit-id', 'ORIG_HEAD', 'HEAD'],
+            text=True
+        )
+        return set(output.splitlines())
+    except subprocess.CalledProcessError:
+        return set()
+
+def should_install_hooks(changed_files: Set[str]) -> bool:
+    """Check if any hook-related files were changed."""
+    hook_related_paths = {
+        'scripts/hooks/',
+        'scripts/install_hooks.py'
+    }
+
+    return any(
+        any(path in file for path in hook_related_paths)
+        for file in changed_files
+    )
+
+def verify_hook_installation() -> bool:
+    """Verify that hooks are properly installed and executable."""
+    git_hooks_dir = os.path.join('.git', 'hooks')
+    required_hooks = {'commit-msg', 'pre-commit', 'post-merge'}
+    
+    for hook in required_hooks:
+        hook_path = os.path.join(git_hooks_dir, hook)
+        if not os.path.exists(hook_path):
+            print(f"❌ Hook not installed: {hook}")
+            return False
+        if not os.access(hook_path, os.X_OK):
+            print(f"❌ Hook not executable: {hook}")
+            return False
+    
+    return True
+
+def main() -> None:
+    """Main function to check and install hooks if needed."""
+    # Always verify hook installation
+    if not verify_hook_installation():
+        print("\n📦 Installing missing hooks...")
+        try:
+            subprocess.run(
+                [sys.executable, 'scripts/install_hooks.py'],
+                check=True
+            )
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Error installing hooks: {e}")
+            sys.exit(1)
+    
+    changed_files = get_changed_files()
+
+    if should_install_hooks(changed_files):
+        print_special("\nHook changes detected, updating hooks...")
+        try:
+            # Install hooks
+            subprocess.run(
+                [sys.executable, 'scripts/install_hooks.py'],
+                check=True
+            )
+
+            # Verify installation
+            print_header("\nVerifying hooks...")
+            verification_results = verify_all_hooks()
+
+            # Process results
+            all_successful = True
+            messages = []
+
+            for hook_name, success, message in verification_results:
+                if success:
+                    print_success(f"{CYAN}{hook_name}{RESET}: {message}")
+                else:
+                    all_successful = False
+                    error_msg = f"{RED}✗{RESET} {CYAN}{hook_name}{RESET}: {message}"
+                    print(error_msg)
+                    messages.append(error_msg)
+
+            # Send notification
+            if all_successful:
+                notify(
+                    "Git Hooks Updated",
+                    "All hooks were successfully installed and verified"
+                )
+            else:
+                notify(
+                    "Git Hooks Update Failed",
+                    "Some hooks failed verification. Check console for details."
+                )
+                sys.exit(1)
+
+        except subprocess.CalledProcessError as e:
+            error_msg = f"❌ Error installing hooks: {e}"
+            print(error_msg)
+            notify("Git Hooks Update Failed", error_msg)
+            sys.exit(1)
+
+if __name__ == "__main__":
+    main()

@@ -1,67 +1,137 @@
 #!/usr/bin/env python3
 """
 Git commit-msg hook to enforce conventional commit messages.
-Installation: Copy to .git/hooks/commit-msg and make executable
+Uses OpenAI to analyze diffs and suggest appropriate commit messages.
 """
+import os
 import sys
 import re
-from typing import Optional
+import subprocess
+from typing import Optional, Dict, Tuple
+import httpx
+from hook_utils import (
+    GREEN, RED, BLUE, CYAN, MAGENTA, RESET,
+    print_warning, print_error,
+    format_command
+)
+from openai import OpenAI
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Initialize OpenAI client
+client = OpenAI(
+    api_key=os.getenv('OPENAI_API_KEY'),
+    http_client=httpx.Client(
+        base_url="https://api.openai.com/v1",
+        timeout=60.0,
+    )
+)
 
 # Conventional commit types
-TYPES = {
-    'feat': 'New feature',
-    'fix': 'Bug fix',
-    'docs': 'Documentation change',
-    'style': 'Code style change (formatting, missing semi colons, etc)',
+COMMIT_TYPES = {
+    'feat': 'New feature (changelog: What\'s New)',
+    'fix': 'Bug fix (changelog: Bug Fixes)',
+    'docs': 'Documentation changes',
+    'style': 'Code style changes (formatting, etc)',
     'refactor': 'Code refactoring',
-    'perf': 'Performance improvement',
-    'test': 'Adding missing tests',
+    'perf': 'Performance improvements',
+    'test': 'Adding or updating tests',
     'build': 'Build system changes',
     'ci': 'CI configuration changes',
-    'chore': 'Chores/maintenance tasks',
+    'chore': 'Maintenance tasks',
     'revert': 'Revert a previous commit'
 }
+
+def suggest_commit_message() -> str:
+    """Generate a commit message suggestion based on the changes."""
+    try:
+        diff = subprocess.check_output(
+            ['git', 'diff', '--cached'],
+            text=True
+        )
+        
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a git commit message analyzer. "
+                        "Respond with a single line conventional commit message. "
+                        "Use the format: <type>(<scope>): <description> "
+                        "Choose type from: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": f"Generate a conventional commit message for these changes:\n\n{diff}"
+                }
+            ],
+            temperature=0.3,
+            max_tokens=60
+        )
+        
+        suggestion = response.choices[0].message.content.strip()
+        # Ensure we only get the first line
+        suggestion = suggestion.split('\n')[0]
+        return suggestion
+    except Exception as e:
+        print_warning(f"Failed to generate suggestion: {e}")
+        return "chore: update project files"
 
 def validate_commit_message(message: str) -> Optional[str]:
     """
     Validate the commit message against conventional commit format.
     Returns error message if invalid, None if valid.
     """
-    # Skip merge commits
     if message.startswith('Merge'):
         return None
 
-    # Pattern for conventional commits
-    pattern = r'^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z-]+\))?: .+'
-
+    pattern = (
+        r'^('
+        + '|'.join(COMMIT_TYPES.keys())
+        + r')(?:\([a-z0-9-]+\))?: .+'
+    )
+    
     if not re.match(pattern, message):
+        suggestion = suggest_commit_message()
         return f"""
-Invalid commit message format: "{message}"
+{RED}✗{RESET} Invalid commit message format: "{message}"
 
-Please use conventional commit format:
-    <type>[optional scope]: <description>
+{BLUE}💡 Suggested message:{RESET}
+    {suggestion}
+
+Commit messages must follow the conventional format:
+    {CYAN}<type>[optional scope]: <description>{RESET}
 
 Available types:
-{chr(10).join(f'    {t}: {desc}' for t, desc in TYPES.items())}
+{chr(10).join(f'    {MAGENTA}{t}{RESET}: {desc}' for t, desc in COMMIT_TYPES.items())}
 
-Examples:
-    feat: add user authentication
-    fix(auth): handle expired tokens
-    docs(readme): update installation steps
-    style: format with black
+To use the suggested message:
+    {format_command(f'git commit --amend -m "{suggestion}"')}
 """
     return None
 
 def main():
     """Main function to validate commit message."""
     commit_msg_file = sys.argv[1]
-    with open(commit_msg_file, 'r', encoding='utf-8', newline='\n') as f:
-        commit_msg = f.read().strip().split('\n')[0]
-
-    error = validate_commit_message(commit_msg)
-    if error:
-        print(error)
+    
+    try:
+        with open(commit_msg_file, 'r', encoding='utf-8', newline='\n') as f:
+            commit_msg = f.read().strip().split('\n')[0]
+        
+        error = validate_commit_message(commit_msg)
+        if error:
+            print(error)
+            sys.exit(1)
+        
+        print(f"{GREEN}✓{RESET} Commit message follows conventional format")
+        
+    except Exception as e:
+        print_error(f"Error validating commit message: {e}")
         sys.exit(1)
 
 if __name__ == '__main__':
-     main()
+    main()

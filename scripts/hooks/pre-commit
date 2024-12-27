@@ -1,31 +1,107 @@
 #!/usr/bin/env python3
 """
-Git pre-commit hook to check and fix line endings and file permissions.
+Git pre-commit hook to check and fix line endings, file permissions,
+and prevent committing sensitive information.
 """
 import os
+import re
 import subprocess
 import sys
-from typing import List, Tuple
+from typing import List, Tuple, Dict
+from fnmatch import fnmatch
+from hook_utils import GREEN, RESET, CYAN, print_success, print_warning, print_info, print_header, format_path, YELLOW
+
+# Patterns for detecting secrets
+SECRETS_PATTERNS = {
+    'Generic API Key': (
+        r'(?i)(api[_-]?key|apikey|secret|password|passwd|pwd|token)["\']?\s*[:=]\s*["\']?([a-z0-9]{16,})["\']?'
+    ),
+    'Firebase Key': r'AIza[0-9A-Za-z\-_]{35}',
+    'Generic Secret': r'(?i)secret["\']?\s*[:=]\s*["\']?([a-z0-9]{16,})["\']?',
+    'Private Key': r'-----BEGIN (?:RSA )?PRIVATE KEY-----',
+    'AWS Access Key': r'AKIA[0-9A-Z]{16}',
+    'Google OAuth': r'[0-9]+-[0-9A-Za-z_]{32}\.apps\.googleusercontent\.com',
+    'Stripe API Key': r'(?i)(sk|pk)_(test|live)_[0-9a-zA-Z]{24}',
+    'GitHub Token': r'gh[ps]_[A-Za-z0-9]{36}',
+    'OpenAI API Key': r'sk-[A-Za-z0-9]{48}',
+    'Firebase Admin SDK': r'firebase-adminsdk-[a-z0-9\-]+@[a-z0-9\-]+\.iam\.gserviceaccount\.com',
+}
+
+# Files that are allowed to contain secrets (e.g., encrypted files)
+ALLOWED_FILES = {
+    '.env.sample',  # Template files with dummy values
+    '.env.example',
+    'example.env',
+    '*_test.py',    # Test files
+    '*.test.js',
+    'test_*.py',
+}
+
+def is_allowed_file(filename: str) -> bool:
+    """Check if file is allowed to contain secrets."""
+    return any(
+        fnmatch(filename, pattern)
+        for pattern in ALLOWED_FILES
+    )
+
+def check_file_for_secrets(file_path: str) -> List[Tuple[str, str, int]]:
+    """Check a file for potential secrets."""
+    if is_allowed_file(file_path):
+        return []
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except Exception:
+        # Skip files that can't be read as text
+        return []
+
+    findings = []
+    for secret_type, pattern in SECRETS_PATTERNS.items():
+        matches = re.finditer(pattern, content)
+        for match in matches:
+            line_number = content.count('\n', 0, match.start()) + 1
+            findings.append((secret_type, match.group(0), line_number))
+
+    return findings
+
+def check_secrets() -> Tuple[bool, List[Dict]]:
+    """Check staged files for secrets."""
+    # Get staged files
+    try:
+        staged = subprocess.check_output(
+            ['git', 'diff', '--cached', '--name-only', '--diff-filter=ACM'],
+            text=True
+        ).splitlines()
+    except subprocess.CalledProcessError:
+        return False, [{'error': 'Failed to get staged files'}]
+
+    all_findings = []
+    for file in staged:
+        if not os.path.exists(file):
+            continue
+
+        findings = check_file_for_secrets(file)
+        if findings:
+            all_findings.append({
+                'file': file,
+                'secrets': findings
+            })
+
+    return len(all_findings) == 0, all_findings
 
 def fix_line_endings_in_file(file_path: str) -> bool:
     """Fix CRLF line endings to LF in the given file."""
     try:
-        # Read in binary mode
         with open(file_path, 'rb') as f:
             content = f.read()
 
-        # Convert CRLF to LF if needed
         if b'\r\n' in content:
             content = content.replace(b'\r\n', b'\n')
-
-            # Write back in binary mode with explicit newline
             with open(file_path, 'wb') as f:
                 f.write(content)
-
-            # Stage the fixed file
             subprocess.run(['git', 'add', file_path], check=True)
             return True
-
         return False
     except Exception as e:
         print(f"Error fixing line endings in {file_path}: {e}")
@@ -34,7 +110,6 @@ def fix_line_endings_in_file(file_path: str) -> bool:
 def fix_all_tracked_files() -> List[str]:
     """Fix line endings in all tracked files."""
     try:
-        # Get all tracked files
         files = subprocess.check_output(
             ['git', 'ls-files'],
             text=True
@@ -47,9 +122,9 @@ def fix_all_tracked_files() -> List[str]:
                     fixed_files.append(file)
 
         if fixed_files:
-            print("Fixed line endings in files:")
+            print_info("Fixed line endings in files:")
             for file in fixed_files:
-                print(f"  {file}")
+                print(f"  {format_path(file)}")
             print("\nFiles have been automatically fixed and staged.")
 
         return fixed_files
@@ -80,7 +155,6 @@ def set_file_permissions() -> List[str]:
                     if new_mode != st.st_mode:
                         os.chmod(file, new_mode)
                         fixed_files.append(file)
-                        # Stage the permission changes
                         subprocess.run(['git', 'add', file], check=True)
         except subprocess.CalledProcessError:
             continue
@@ -96,7 +170,6 @@ def set_file_permissions() -> List[str]:
 def run_pylint() -> Tuple[bool, str]:
     """Run pylint on staged Python files."""
     try:
-        # Get staged Python files
         staged = subprocess.check_output(
             ['git', 'diff', '--cached', '--name-only', '--diff-filter=ACM', '*.py'],
             text=True
@@ -105,7 +178,6 @@ def run_pylint() -> Tuple[bool, str]:
         if not staged:
             return True, "No Python files to check."
 
-        # Run pylint on staged files
         try:
             subprocess.run(
                 ['pylint'] + staged,
@@ -119,21 +191,274 @@ def run_pylint() -> Tuple[bool, str]:
     except Exception as e:
         return False, f"Error running pylint: {e}"
 
+def fix_python_style(file_path: str) -> bool:
+    """Fix common Python style issues."""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        modified = False
+        lines = content.splitlines()
+        
+        # Fix indentation issues
+        i = 0
+        indent_stack = []
+        while i < len(lines):
+            line = lines[i]
+            stripped = line.strip()
+            
+            # Skip empty lines
+            if not stripped:
+                i += 1
+                continue
+            
+            # Calculate current indentation
+            current_indent = len(line) - len(line.lstrip())
+            
+            # Check for blocks that should increase indentation
+            if any(stripped.endswith(char) for char in (':', '{', '(')):
+                indent_stack.append(current_indent)
+            
+            # Check if we should be indented
+            elif indent_stack and current_indent <= indent_stack[-1]:
+                # This line should be indented
+                if not stripped.startswith(('except', 'else:', 'elif')):
+                    new_indent = indent_stack[-1] + 4
+                    if current_indent != new_indent:
+                        lines[i] = ' ' * new_indent + line.lstrip()
+                        modified = True
+            
+            # Remove completed blocks
+            if indent_stack and (
+                i + 1 >= len(lines) or
+                (i + 1 < len(lines) and
+                 len(lines[i + 1]) - len(lines[i + 1].lstrip()) <= indent_stack[-1])
+            ):
+                indent_stack.pop()
+            
+            i += 1
+        
+        # Fix malformed with statements
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
+            
+            # Look for malformed with statements
+            if 'with' in line and '=' in line and 'as' in line:
+                # Fix cases where 'with' and 'as' are on the same line but malformed
+                parts = line.split('=', 1)
+                if len(parts) == 2:
+                    var_name = parts[0].strip()
+                    expr = parts[1].strip()
+                    if expr.startswith('with'):
+                        # Remove 'with' from expression
+                        expr = expr.replace('with', '', 1).strip()
+                        # Fix the line
+                        lines[i] = f"with {expr}"
+                        modified = True
+            
+            # Fix misplaced 'as' clauses
+            if line.endswith('as'):
+                next_line = lines[i + 1].strip() if i + 1 < len(lines) else ''
+                if next_line and not next_line.startswith('as'):
+                    # Join the lines correctly
+                    lines[i] = f"{line} {next_line}"
+                    lines[i + 1] = ''
+                    modified = True
+            
+            # Fix indentation in with blocks
+            if line.startswith('with') and ':' not in line:
+                j = i + 1
+                while j < len(lines) and (not lines[j].strip() or lines[j].startswith(' ')):
+                    if lines[j].strip():
+                        indent = len(lines[j]) - len(lines[j].lstrip())
+                        lines[j] = ' ' * (indent + 4) + lines[j].lstrip()
+                        modified = True
+                    j += 1
+            
+            i += 1
+        
+        # Fix subprocess.Popen without 'with'
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
+            
+            # Look for subprocess.Popen patterns
+            if 'subprocess.Popen(' in line or 'Popen(' in line:
+                indent = len(lines[i]) - len(lines[i].lstrip())
+                indent_str = ' ' * indent
+                
+                # Extract the Popen call and its arguments
+                if '=' in line:
+                    var_name = line.split('=')[0].strip()
+                    # Find the end of the Popen call
+                    j = i
+                    popen_lines = []
+                    paren_count = line.count('(') - line.count(')')
+                    while paren_count > 0 and j < len(lines):
+                        popen_lines.append(lines[j])
+                        j += 1
+                        if j < len(lines):
+                            paren_count += lines[j].count('(') - lines[j].count(')')
+                    
+                    # Convert to 'with' context manager
+                    if not any('with' in l for l in lines[max(0, i-1):i+1]):
+                        popen_code = '\n'.join(popen_lines)
+                        new_lines = [
+                            f"{indent_str}with {popen_code} as {var_name}:",
+                        ]
+                        
+                        # Find the block of code using the process
+                        k = j
+                        while k < len(lines) and (
+                            k == j or 
+                            len(lines[k].strip()) == 0 or 
+                            len(lines[k]) - len(lines[k].lstrip()) > indent
+                        ):
+                            if var_name in lines[k] and 'with' not in lines[k]:
+                                new_lines.append(f"{indent_str}    {lines[k].strip()}")
+                                lines[k] = ''
+                            k += 1
+                        
+                        lines[i:j] = new_lines
+                        modified = True
+                        i = k
+                        continue
+            i += 1
+        
+        # Fix empty imports
+        for i, line in enumerate(lines):
+            # Fix empty typing imports
+            if line.strip() == 'from typing import':
+                lines[i] = ''
+                modified = True
+            # Fix trailing whitespace
+            stripped = line.rstrip()
+            if stripped != line:
+                lines[i] = stripped
+                modified = True
+        
+        # Remove unused imports
+        import_pattern = r'^from\s+(\w+)\s+import\s+([^#\n]+)'
+        for i, line in enumerate(lines):
+            if match := re.match(import_pattern, line):
+                module, imports = match.groups()
+                imports = [imp.strip() for imp in imports.split(',')]
+                
+                # Check each import
+                used_imports = []
+                for imp in imports:
+                    # Simple check if import is used anywhere in the file
+                    is_used = any(
+                        imp in other_line and not other_line.startswith('from')
+                        for other_line in lines[i+1:]
+                    )
+                    if is_used:
+                        used_imports.append(imp)
+                
+                if len(used_imports) != len(imports):
+                    if used_imports:
+                        lines[i] = f"from {module} import {', '.join(used_imports)}"
+                    else:
+                        lines[i] = ''  # Remove the entire import if nothing is used
+                    modified = True
+        
+        # Remove consecutive blank lines
+        new_lines = []
+        prev_empty = False
+        for line in lines:
+            if line.strip():
+                new_lines.append(line)
+                prev_empty = False
+            elif not prev_empty:
+                new_lines.append(line)
+                prev_empty = True
+        if new_lines != lines:
+            lines = new_lines
+            modified = True
+        
+        if modified:
+            # Join lines and ensure single newline at end
+            content = '\n'.join(line for line in lines if line.strip() or prev_empty) + '\n'
+            with open(file_path, 'w', encoding='utf-8', newline='\n') as f:
+                f.write(content)
+            subprocess.run(['git', 'add', file_path], check=True)
+            print_success(f"Fixed style issues in {format_path(file_path)}")
+            return True
+        
+        return False
+    except Exception as e:
+        print_warning(f"Error fixing style in {file_path}: {e}")
+        return False
+
+def fix_all_python_files() -> List[str]:
+    """Fix style issues in all staged Python files."""
+    try:
+        # Get staged Python files
+        staged = subprocess.check_output(
+            ['git', 'diff', '--cached', '--name-only', '--diff-filter=ACM', '*.py'],
+            text=True
+        ).splitlines()
+        
+        fixed_files = []
+        for file in staged:
+            if os.path.exists(file) and fix_python_style(file):
+                fixed_files.append(file)
+        
+        if fixed_files:
+            print_info("Fixed style issues in files:")
+            for file in fixed_files:
+                print(f"  {format_path(file)}")
+            print("\nStyle fixes have been staged.")
+        
+        return fixed_files
+    except Exception as e:
+        print_warning(f"Error fixing Python files: {e}")
+        return []
+
 def main():
     """Main function to run pre-commit checks and fixes."""
-    print("Fixing line endings in all tracked files...")
+    # Preserve terminal for interactive prompts
+    os.environ['GIT_TERMINAL_PROMPT'] = '1'
+    
+    # Ensure we're running in interactive mode
+    if not sys.stdin.isatty():
+        return run_interactive(__file__)
+
+    # Check for secrets first
+    print_header("Checking for secrets in staged files...")
+    secrets_ok, findings = check_secrets()
+    if not secrets_ok:
+        print_warning("\nPotential secrets found:")
+        for finding in findings:
+            print(f"\nFile: {finding['file']}")
+            for secret_type, value, line in finding['secrets']:
+                print(f"  Line {line}: {YELLOW}{secret_type}{RESET}")
+                print(f"  Value: {value[:20]}...")
+        print("\n❌ Commit blocked: Please remove secrets and use environment variables instead")
+        sys.exit(1)
+    print(f"{GREEN}✓{RESET} No secrets found")
+
+    # Fix Python style issues
+    print_header("\nFixing Python style issues...")
+    fix_all_python_files()
+
+    # Fix line endings
+    print_header("\nFixing line endings in all tracked files...")
     fix_all_tracked_files()
 
-    print("\nChecking and fixing file permissions...")
+    # Fix permissions
+    print_header("\nChecking and fixing file permissions...")
     set_file_permissions()
 
-    print("\nRunning pylint checks...")
+    # Run pylint
+    print_header("\nRunning pylint checks...")
     success, message = run_pylint()
     if not success:
         print(message)
         sys.exit(1)
 
-    print("\nAll pre-commit checks and fixes completed successfully!")
+    print(f"\n{GREEN}✨ All pre-commit checks and fixes completed successfully!{RESET}")
 
 if __name__ == "__main__":
     main()
