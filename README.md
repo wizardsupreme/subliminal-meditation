@@ -1,4 +1,4 @@
-# Subliminal Meditation App
+# Template App
 
 A powerful meditation app with subliminal messaging capabilities, built with Flask and Firebase.
 
@@ -6,7 +6,7 @@ A powerful meditation app with subliminal messaging capabilities, built with Fla
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/wizardsupreme/subliminal.git
+git clone https://github.com/wizardsupreme/flask-firebase-template.git
 cd subliminal
 
 # 2. Set up Python environment
@@ -33,6 +33,7 @@ Visit `http://localhost:5000` to see your app running.
 ## 🔧 What Gets Set Up
 
 When you run the quick start commands above, the following happens automatically:
+
 
 1. All Python dependencies are installed
 2. Git hooks are set up for:
@@ -112,6 +113,7 @@ OPENAI_API_KEY=your-openai-key
 
 The project uses several git hooks that are automatically installed:
 
+
 1. **Pre-commit Hook**
    * Checks code quality
    * Fixes line endings
@@ -146,6 +148,7 @@ chmod +x .git/hooks/*  # On Unix systems
 ```
 
 ### How the Hooks Work
+
 
 1. **Pre-commit Hook** (`scripts/hooks/pre-commit`)
 
@@ -184,11 +187,13 @@ chmod +x .git/hooks/*  # On Unix systems
 
 If hooks aren't running:
 
+
 1. Check they're executable: `ls -l .git/hooks/`
 2. Verify installation: `python scripts/verify_setup.py`
 3. Reinstall: `python scripts/install_hooks.py`
 
 If you get "ModuleNotFoundError: No module named 'scripts'":
+
 
 1. Make sure you're in the project root directory
 2. Add the project root to PYTHONPATH:
@@ -244,6 +249,7 @@ flask run
 ### Utility Scripts
 
 The project includes several utility scripts for development:
+
 
 1. **Avatar Setup** (`scripts/setup_avatar.py`)
 
@@ -342,6 +348,7 @@ python scripts/fix_line_endings.py
 
 ### Option 1: Deploy to Render (Recommended)
 
+
 1. Push your code to GitHub
 2. Visit [Render](https://render.com) and create a new Web Service
 3. Connect your GitHub repository
@@ -352,6 +359,7 @@ python scripts/fix_line_endings.py
 5. Click Deploy!
 
 ### Option 2: Deploy to Your Server
+
 
 1. Clone the repository on your server
 2. Install dependencies:
@@ -369,6 +377,7 @@ python scripts/fix_line_endings.py
    ```
 
 ## 📝 Contributing
+
 
 1. Fork the repository
 2. Create your feature branch:
