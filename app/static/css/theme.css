@@ -21,10 +21,12 @@
     box-shadow: 0 2px 8px var(--shadow);
     transition: all var(--transition-duration) ease;
     z-index: 1000;
+    color: white;
 }
 
 .theme-toggle:hover {
     transform: scale(1.1);
+    background: var(--primary-color-hover);
 }
 
 .theme-toggle:active {
@@ -34,6 +36,7 @@
 /* Light theme (default) */
 :root {
     --primary-color: #7C4DFF;
+    --primary-color-hover: #6c3ce6;
     --secondary-color: #B388FF;
     --accent-color: #3F51B5;
     --background-color: #FFFFFF;
@@ -47,11 +50,15 @@
     --warning: #FFC107;
     --error: #F44336;
     --info: #2196F3;
+    --navbar-bg: #F8F9FA;
+    --footer-bg: #F8F9FA;
+    --card-bg: #FFFFFF;
 }
 
 /* Dark theme */
 :root.dark-mode {
     --primary-color: #B388FF;
+    --primary-color-hover: #9e74ff;
     --secondary-color: #7C4DFF;
     --accent-color: #3F51B5;
     --background-color: #121212;
@@ -65,6 +72,9 @@
     --warning: #FFD54F;
     --error: #E57373;
     --info: #64B5F6;
+    --navbar-bg: #1E1E1E;
+    --footer-bg: #1E1E1E;
+    --card-bg: #2D2D2D;
 }
 
 /* Apply theme colors */
@@ -74,24 +84,74 @@ body {
     transition: all var(--transition-duration) ease;
 }
 
-/* Additional theme-specific styles */
-.card,
-.modal-content {
-    background-color: var(--surface-color);
-    border-color: var(--border-color);
+/* Navbar theming */
+.navbar {
+    background-color: var(--navbar-bg) !important;
+    border-bottom: 1px solid var(--border-color);
+    transition: all var(--transition-duration) ease;
 }
 
+.navbar-light .navbar-brand,
+.navbar-light .navbar-nav .nav-link {
+    color: var(--text-primary) !important;
+}
+
+/* Footer theming */
+.footer {
+    background-color: var(--footer-bg) !important;
+    border-top: 1px solid var(--border-color);
+    transition: all var(--transition-duration) ease;
+}
+
+.footer .text-muted {
+    color: var(--text-secondary) !important;
+}
+
+/* Card theming */
+.card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    transition: all var(--transition-duration) ease;
+}
+
+.card-header {
+    background-color: var(--surface-color);
+    border-bottom-color: var(--border-color);
+}
+
+/* Button theming */
 .btn-primary {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-color-hover);
+    border-color: var(--primary-color-hover);
 }
 
 .btn-secondary {
     background-color: var(--secondary-color);
     border-color: var(--secondary-color);
+    color: white;
 }
 
-/* Theme-specific text colors */
+/* Form controls */
+.form-control {
+    background-color: var(--surface-color);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.form-control:focus {
+    background-color: var(--surface-color);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.25rem rgba(124, 77, 255, 0.25);
+}
+
+/* Text colors */
 h1, h2, h3, h4, h5, h6 {
     color: var(--text-primary);
 }
@@ -102,6 +162,11 @@ p, span {
 
 a {
     color: var(--text-accent);
+    transition: color var(--transition-duration) ease;
+}
+
+a:hover {
+    color: var(--primary-color-hover);
 }
 
 /* Status colors */
@@ -109,6 +174,28 @@ a {
 .text-warning { color: var(--warning) !important; }
 .text-danger { color: var(--error) !important; }
 .text-info { color: var(--info) !important; }
+
+/* Alert theming */
+.alert {
+    background-color: var(--surface-color);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.alert-danger {
+    background-color: rgba(244, 67, 54, 0.1);
+    border-color: var(--error);
+    color: var(--error);
+}
+
+/* Table theming */
+.table {
+    color: var(--text-primary);
+}
+
+.table td, .table th {
+    border-color: var(--border-color);
+}
 
 /* Theme transition for images */
 img {
