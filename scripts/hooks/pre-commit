@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+"""
+Git pre-commit hook to check and fix line endings and file permissions.
+"""
+import os
+import subprocess
+import sys
+from typing import List, Tuple
+
+def fix_line_endings_in_file(file_path: str) -> bool:
+    """Fix CRLF line endings to LF in the given file."""
+    try:
+        # Read in binary mode
+        with open(file_path, 'rb') as f:
+            content = f.read()
+
+        # Convert CRLF to LF if needed
+        if b'\r\n' in content:
+            content = content.replace(b'\r\n', b'\n')
+
+            # Write back in binary mode with explicit newline
+            with open(file_path, 'wb') as f:
+                f.write(content)
+
+            # Stage the fixed file
+            subprocess.run(['git', 'add', file_path], check=True)
+            return True
+
+        return False
+    except Exception as e:
+        print(f"Error fixing line endings in {file_path}: {e}")
+        return False
+
+def fix_all_tracked_files() -> List[str]:
+    """Fix line endings in all tracked files."""
+    try:
+        # Get all tracked files
+        files = subprocess.check_output(
+            ['git', 'ls-files'],
+            text=True
+        ).splitlines()
+
+        fixed_files = []
+        for file in files:
+            if os.path.exists(file) and not os.path.isdir(file):
+                if fix_line_endings_in_file(file):
+                    fixed_files.append(file)
+
+        if fixed_files:
+            print("Fixed line endings in files:")
+            for file in fixed_files:
+                print(f"  {file}")
+            print("\nFiles have been automatically fixed and staged.")
+
+        return fixed_files
+    except Exception as e:
+        print(f"Error fixing files: {e}")
+        return []
+
+def set_file_permissions() -> List[str]:
+    """Set correct file permissions for different file types."""
+    executable_patterns = [
+        '*.sh',
+        'scripts/*/*.py',
+        'scripts/*.py'
+    ]
+
+    fixed_files = []
+    for pattern in executable_patterns:
+        try:
+            files = subprocess.check_output(
+                ['git', 'ls-files', pattern],
+                text=True
+            ).splitlines()
+
+            for file in files:
+                if os.path.exists(file):
+                    st = os.stat(file)
+                    new_mode = st.st_mode | 0o755  # rwxr-xr-x
+                    if new_mode != st.st_mode:
+                        os.chmod(file, new_mode)
+                        fixed_files.append(file)
+                        # Stage the permission changes
+                        subprocess.run(['git', 'add', file], check=True)
+        except subprocess.CalledProcessError:
+            continue
+
+    if fixed_files:
+        print("\nFixed permissions in:")
+        for file in fixed_files:
+            print(f"  {file}")
+        print("\nPermission changes have been staged.")
+
+    return fixed_files
+
+def run_pylint() -> Tuple[bool, str]:
+    """Run pylint on staged Python files."""
+    try:
+        # Get staged Python files
+        staged = subprocess.check_output(
+            ['git', 'diff', '--cached', '--name-only', '--diff-filter=ACM', '*.py'],
+            text=True
+        ).splitlines()
+
+        if not staged:
+            return True, "No Python files to check."
+
+        # Run pylint on staged files
+        try:
+            subprocess.run(
+                ['pylint'] + staged,
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            return True, "Pylint checks passed."
+        except subprocess.CalledProcessError as e:
+            return False, f"Pylint found issues:\n{e.output}"
+    except Exception as e:
+        return False, f"Error running pylint: {e}"
+
+def main():
+    """Main function to run pre-commit checks and fixes."""
+    print("Fixing line endings in all tracked files...")
+    fix_all_tracked_files()
+
+    print("\nChecking and fixing file permissions...")
+    set_file_permissions()
+
+    print("\nRunning pylint checks...")
+    success, message = run_pylint()
+    if not success:
+        print(message)
+        sys.exit(1)
+
+    print("\nAll pre-commit checks and fixes completed successfully!")
+
+if __name__ == "__main__":
+    main()
