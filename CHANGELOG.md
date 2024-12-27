@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1] - 2024-12-27
+
+### Summary
+The commits add Python code structure rules to the .cursorrules file in the documentation. This change will impact developers by providing guidelines for structuring Python code, ensuring consistency and maintainability in their projects. The rules added to the .cursorrules file will help developers adhere to best practices when writing Python code, ultimately improving the quality and readability of their codebase.
+
+### Documentation
+- docs: add Python code structure rules to .cursorrules
+
 ## [0.2.0] - 2024-12-27
 
 ### Summary
