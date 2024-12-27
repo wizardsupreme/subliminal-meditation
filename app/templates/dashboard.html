@@ -22,13 +22,21 @@
                 <hr>
                 <p class="small text-muted">User ID: {{ session.get('user_id') }}</p>
                 {% endif %}
-                <div class="d-grid gap-2">
-                    <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">
-                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                    </a>
-                </div>
             </div>
         </div>
+    </div>
+
+    <!-- Top Right Buttons -->
+    <div class="top-right-buttons">
+        <button id="theme-toggle" 
+                class="theme-toggle" 
+                aria-label="Toggle dark mode"
+                onclick="themeSwitcher.toggleTheme()">
+            🌙
+        </button>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-logout" title="Logout">
+            <i class="fas fa-door-open"></i>
+        </a>
     </div>
     
     <!-- Main Content Area -->
