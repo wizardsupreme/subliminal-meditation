@@ -34,8 +34,6 @@ Visit `http://localhost:5000` to see your app running.
 
 When you run the quick start commands above, the following happens automatically:
 
-
-
 1. All Python dependencies are installed
 2. Git hooks are set up for:
    * Code quality checks (pre-commit)
@@ -52,6 +50,67 @@ Features are configurable in `config/site_info.yaml`. Default features include:
 * 📱 Responsive design
 * 🎨 Modern UI with Bootstrap 5
 * 🚀 Production-ready configuration
+* 🤖 AI-powered version management and changelog generation
+
+## 📦 Version Management
+
+This project uses an AI-powered automated system for version management, commit messages, and changelog generation.
+
+### Commit Messages
+
+We use conventional commit messages enforced by a pre-commit hook:
+- `feat:` for new features
+- `fix:` for bug fixes
+- `docs:` for documentation changes
+- `style:` for code style changes
+- `refactor:` for code refactoring
+- `perf:` for performance improvements
+- `test:` for test changes
+- `build:` for build system changes
+- `ci:` for CI/CD changes
+- `chore:` for maintenance tasks
+- `revert:` for reverting changes
+
+Breaking changes are denoted by adding a `!` or `BREAKING CHANGE` in the commit message.
+
+### Version Management
+
+Versions follow Semantic Versioning (MAJOR.MINOR.PATCH):
+- MAJOR version for breaking changes (!)
+- MINOR version for new features (feat:)
+- PATCH version for bug fixes (fix:) and other changes
+
+The version is automatically bumped based on commit messages since the last tag.
+
+### Changelog Generation
+
+The changelog is automatically generated and updated using:
+1. Conventional commit messages for categorization
+2. OpenAI GPT-3.5 for generating human-readable summaries
+3. Git tags for version tracking
+
+Features:
+- Categorizes commits by type (features, fixes, etc.)
+- Generates AI-powered summaries of changes
+- Maintains a clean, consistent format
+- Automatically creates version tags
+- Updates on each commit
+
+Example changelog entry:
+```markdown
+## [1.2.3] - 2024-01-01
+
+### Summary
+Added dark mode support and fixed several UI responsiveness issues.
+
+### Features
+- feat: implement dark mode theme switch
+- feat: add user preference persistence
+
+### Bug Fixes
+- fix: resolve mobile layout issues
+- fix: correct button alignment in sidebar
+```
 
 ## 📁 Project Structure
 
@@ -91,20 +150,20 @@ Features are configurable in `config/site_info.yaml`. Default features include:
 
 Copy `.env.sample` to `.env` and configure:
 
-   ```ini
-   # Flask Configuration
-   FLASK_ENV=development
-   FLASK_APP=run.py
-   SECRET_KEY=your-secret-key
+```ini
+# Flask Configuration
+FLASK_ENV=development
+FLASK_APP=run.py
+SECRET_KEY=your-secret-key
 
 # Firebase Configuration
-   FIREBASE_API_KEY=your-api-key
-   FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-   FIREBASE_PROJECT_ID=your-project-id
-   FIREBASE_STORAGE_BUCKET=your-bucket
-   FIREBASE_MESSAGING_SENDER_ID=your-sender-id
-   FIREBASE_APP_ID=your-app-id
-   FIREBASE_MEASUREMENT_ID=your-measurement-id
+FIREBASE_API_KEY=your-api-key
+FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_STORAGE_BUCKET=your-bucket
+FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+FIREBASE_APP_ID=your-app-id
+FIREBASE_MEASUREMENT_ID=your-measurement-id
 
 # OpenAI Configuration (for commit messages)
 OPENAI_API_KEY=your-openai-key
@@ -113,8 +172,6 @@ OPENAI_API_KEY=your-openai-key
 ### Git Hooks
 
 The project uses several git hooks that are automatically installed:
-
-
 
 1. **Pre-commit Hook**
    * Checks code quality
@@ -150,8 +207,6 @@ chmod +x .git/hooks/*  # On Unix systems
 ```
 
 ### How the Hooks Work
-
-
 
 1. **Pre-commit Hook** (`scripts/hooks/pre-commit`)
 
@@ -190,15 +245,11 @@ chmod +x .git/hooks/*  # On Unix systems
 
 If hooks aren't running:
 
-
-
 1. Check they're executable: `ls -l .git/hooks/`
 2. Verify installation: `python scripts/verify_setup.py`
 3. Reinstall: `python scripts/install_hooks.py`
 
 If you get "ModuleNotFoundError: No module named 'scripts'":
-
-
 
 1. Make sure you're in the project root directory
 2. Add the project root to PYTHONPATH:
@@ -254,8 +305,6 @@ flask run
 ### Utility Scripts
 
 The project includes several utility scripts for development:
-
-
 
 1. **Avatar Setup** (`scripts/setup_avatar.py`)
 
@@ -354,8 +403,6 @@ python scripts/fix_line_endings.py
 
 ### Option 1: Deploy to Render (Recommended)
 
-
-
 1. Push your code to GitHub
 2. Visit [Render](https://render.com) and create a new Web Service
 3. Connect your GitHub repository
@@ -366,8 +413,6 @@ python scripts/fix_line_endings.py
 5. Click Deploy!
 
 ### Option 2: Deploy to Your Server
-
-
 
 1. Clone the repository on your server
 2. Install dependencies:
@@ -385,8 +430,6 @@ python scripts/fix_line_endings.py
    ```
 
 ## 📝 Contributing
-
-
 
 1. Fork the repository
 2. Create your feature branch:
@@ -410,43 +453,11 @@ python scripts/fix_line_endings.py
 
 [MIT](LICENSE) - Feel free to use this project for your own purposes.
 
-## Commit Message Convention
-
-This project follows [Conventional Commits](https://www.conventionalcommits.org/). Each commit message should be structured as follows:
-
-```
-<type>[optional scope]: <description>
-```
-
-### Types
-
-* `feat`: New feature
-* `fix`: Bug fix
-* `docs`: Documentation change
-* `style`: Code style change
-* `refactor`: Code refactoring
-* `perf`: Performance improvement
-* `test`: Adding missing tests
-* `build`: Build system changes
-* `ci`: CI configuration changes
-* `chore`: Maintenance tasks
-* `revert`: Revert a previous commit
-
-### Examples
-
-```
-feat: add user authentication
-fix(auth): handle expired tokens
-docs(readme): update installation steps
-style: format with black
-``` 
-
 ## 🔒 CodeQL Security Analysis
 
 The project includes local CodeQL analysis in the pre-commit hooks. This helps catch potential security issues before they're committed.
 
 ### Setting up CodeQL locally:
-
 
 1. Install the CodeQL CLI:
 
@@ -507,34 +518,31 @@ This repository maintains high code quality standards through automated checks a
 ### Coding Standards
 
 1. **Security Best Practices** (enforced by CodeQL):
-   - Prevention of SQL/Command injection vulnerabilities
-   - Secure file path handling
-   - Safe data deserialization
-   - Proper session management
-   - CSRF protection
-   - Secure HTTP header handling
-   - Input validation and sanitization
-
+   * Prevention of SQL/Command injection vulnerabilities
+   * Secure file path handling
+   * Safe data deserialization
+   * Proper session management
+   * CSRF protection
+   * Secure HTTP header handling
+   * Input validation and sanitization
 2. **Code Style and Quality**:
-   - Automated import optimization
-   - Proper line endings (LF)
-   - Consistent indentation (4 spaces)
-   - No unused imports or variables
-   - Single newline at end of files
-   - No trailing whitespace
-   - Clean block structure
-
+   * Automated import optimization
+   * Proper line endings (LF)
+   * Consistent indentation (4 spaces)
+   * No unused imports or variables
+   * Single newline at end of files
+   * No trailing whitespace
+   * Clean block structure
 3. **Resource Management**:
-   - Context managers for file operations
-   - Secure subprocess handling
-   - Proper resource cleanup
-   - Exception safety
-
+   * Context managers for file operations
+   * Secure subprocess handling
+   * Proper resource cleanup
+   * Exception safety
 4. **Documentation**:
-   - Required function docstrings
-   - Type annotations
-   - Parameter descriptions
-   - Return type documentation
+   * Required function docstrings
+   * Type annotations
+   * Parameter descriptions
+   * Return type documentation
 
 ### Automated Fixes
 
@@ -555,6 +563,7 @@ git commit -m "your message"
 ```
 
 To skip the automated fixes (not recommended):
+
 ```bash
 git commit --no-verify -m "your message"
 ```

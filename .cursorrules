@@ -19,6 +19,21 @@
 - Add descriptive comments for complex logic
 - Use early returns to reduce nesting
 
+## Documentation
+- Keep README up to date
+- Document all functions and classes
+- Include usage examples
+- Document environment variables
+- Maintain changelog
+- Follow standard documentation order:
+  1. Project introduction and features
+  2. Installation and setup
+  3. Usage and configuration
+  4. Development guidelines
+  5. Changelog
+  6. Contributing (always at the end)
+  7. License (always the last section)
+
 ## OpenAI Integration
 - Initialize OpenAI client with httpx configuration:
   ```python
@@ -54,13 +69,6 @@
   - Secrets detection
   - CodeQL analysis
   - Pylint checks
-
-## Documentation
-- Keep README up to date
-- Document all functions and classes
-- Include usage examples
-- Document environment variables
-- Maintain changelog
 
 ## Testing
 - Write unit tests for new features

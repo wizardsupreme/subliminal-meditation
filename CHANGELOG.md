@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.2] - 2024-12-27
+
+### Summary
+The commits added version management documentation to the README file. This change will help users understand how versioning is managed within the project, making it easier for them to track changes and updates. This can improve collaboration and communication among team members working on the project.
+
+### Documentation
+- docs: add version management documentation to README
+
 ## [0.2.1] - 2024-12-27
 
 ### Summary
