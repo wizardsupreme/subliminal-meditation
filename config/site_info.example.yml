@@ -1,15 +1,14 @@
 # Site Information
 site:
-  name: "Subliminal Meditation App"
-  description: "A powerful meditation app with subliminal messaging capabilities"
-  tagline: "Transform your mind through guided meditation"
-  keywords: ["meditation", "mindfulness", "subliminal", "wellness"]
-  theme: "meditation"
+  name: "Template App"
+  description: "A powerful flask app with authentication and database capabilities"
+  tagline: "Transform your development using AI"
+  keywords: ["template", "automation", "AI", "coding"]
+  theme: "template"
 
 # Company Information
 company:
   name: "Exponentials Studio"
-  year: 2024
 
 # Version Information
 version:
@@ -24,9 +23,9 @@ features:
     description: "Toggle between light and dark themes"
     enabled: true
 
-  - name: "Meditation Sessions"
+  - name: "First Track"
     icon: "🧘‍♂️"
-    description: "Manage and track meditation sessions"
+    description: "Manage and track user sessions"
     enabled: true
 
   - name: "Background Sounds"
@@ -36,7 +35,7 @@ features:
 
   - name: "User Profiles"
     icon: "👤"
-    description: "Personalized meditation tracking"
+    description: "Personalized profile tracking"
     enabled: true
 
   - name: "Responsive Design"
