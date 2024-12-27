@@ -8,6 +8,11 @@ site:
 
 # Features Configuration
 features:
+  - name: "Dark Mode"
+    icon: "🌙"
+    description: "Toggle between light and dark themes"
+    enabled: true
+
   - name: "Meditation Sessions"
     icon: "🧘‍♂️"
     description: "Manage and track meditation sessions"
@@ -35,19 +40,63 @@ features:
 
 # Branding
 branding:
-  primary_color: "#7C4DFF"
-  secondary_color: "#B388FF"
-  accent_color: "#3F51B5"
+  themes:
+    light:
+      primary_color: "#7C4DFF"
+      secondary_color: "#B388FF"
+      accent_color: "#3F51B5"
+      background_color: "#FFFFFF"
+      surface_color: "#F5F5F5"
+      text:
+        primary: "#212121"
+        secondary: "#757575"
+        accent: "#7C4DFF"
+      border_color: "#E0E0E0"
+      shadow: "rgba(0, 0, 0, 0.1)"
+      success: "#4CAF50"
+      warning: "#FFC107"
+      error: "#F44336"
+      info: "#2196F3"
+
+    dark:
+      primary_color: "#B388FF"
+      secondary_color: "#7C4DFF"
+      accent_color: "#3F51B5"
+      background_color: "#121212"
+      surface_color: "#1E1E1E"
+      text:
+        primary: "#FFFFFF"
+        secondary: "#B0B0B0"
+        accent: "#B388FF"
+      border_color: "#333333"
+      shadow: "rgba(0, 0, 0, 0.3)"
+      success: "#81C784"
+      warning: "#FFD54F"
+      error: "#E57373"
+      info: "#64B5F6"
   
   logo:
     type: "lotus"
     favicon_sizes: [16, 32, 48]
     favicon_formats: ["ico", "png"]
     apple_touch_icon: true
+    dark_mode_compatible: true
 
   avatar:
     default_theme: "meditation"
     default_path: "app/static/img/avatars/default.png"
+    dark_mode_path: "app/static/img/avatars/default-dark.png"
+
+# Theme Settings
+theme:
+  default_mode: "light"  # can be "light", "dark", or "system"
+  allow_user_preference: true
+  persist_preference: true
+  transition_duration: "0.3s"
+  auto_switch:
+    enabled: true
+    start_dark_mode: "18:00"  # 6 PM
+    end_dark_mode: "06:00"    # 6 AM
 
 # Content Directories
 directories:
