@@ -6,4 +6,5 @@ __pycache__/
 .vscode/
 *.log
 .DS_Store
-cursor/local/secrets/ 
+cursor/local/secrets/
+.codeql/ 
