@@ -4,6 +4,7 @@ import shutil
 import stat
 from typing import Dict
 import platform
+import sys
 # ANSI color codes
 GREEN = '\033[92m'
 RED = '\033[91m'
@@ -13,10 +14,7 @@ BOLD = '\033[1m'
 HOOK_DESCRIPTIONS: Dict[str, str] = {
     'pre-commit': 'Checks code quality, secrets, and fixes issues',
     'commit-msg': 'Validates commit message format',
-    'pre-push': 'Runs tests and checks before pushing',
-    'post-checkout': 'Sets up environment after checkout',
     'post-merge': 'Auto-installs new hooks after pull/merge',
-    # Add descriptions for any new hooks here
 }
 def print_success(message: str) -> None:
     """Print a success message with green checkmark."""
@@ -33,17 +31,11 @@ def discover_hooks() -> Dict[str, str]:
         return available_hooks
     for filename in os.listdir(hooks_dir):
         filepath = os.path.join(hooks_dir, filename)
-        if os.path.isfile(filepath):
-            description = HOOK_DESCRIPTIONS.get(
-                filename,
-                "No description available"
-            )
-            available_hooks[filename] = description
+        if os.path.isfile(filepath) and filename in HOOK_DESCRIPTIONS:
+            available_hooks[filename] = HOOK_DESCRIPTIONS[filename]
         return available_hooks
 def install_hooks() -> None:
     """Install git hooks to the project."""
-    # Ensure hooks can interact with terminal
-    os.environ['GIT_TERMINAL_PROMPT'] = '1'
     git_hooks_dir = os.path.join('.git', 'hooks')
     os.makedirs(git_hooks_dir, exist_ok=True)
     available_hooks = discover_hooks()
@@ -59,20 +51,18 @@ def install_hooks() -> None:
         destination = os.path.join(git_hooks_dir, hook_name)
         try:
             print(f"\nInstalling {hook_name}...")
-            # Create a wrapper script that uses python explicitly
             if platform.system() == 'Windows':
                 with open(destination, 'w', encoding='utf-8', newline='\n') as f:
-                    f.write(f'#!/bin/sh\npython "{os.path.abspath(source)}" "$@"')
+                    f.write(f'#!/bin/sh\n"{sys.executable}" "{os.path.abspath(source)}" "$@"')
             else:
                 shutil.copy2(source, destination)
-                # Make the hook executable
                 st = os.stat(destination)
                 os.chmod(destination, st.st_mode | stat.S_IEXEC)
-            print_success(f"{hook_name} installed successfully")
+                print_success(f"{hook_name} installed successfully")
         except Exception as e:
             print_error(f"Error installing {hook_name}: {e}")
-        # Set permissions for all script files
-    print("\nSetting script permissions...")
+            # Set permissions for all script files
+        print("\nSetting script permissions...")
     executable_patterns = [
         '*.sh',
         'scripts/*/*.py',
