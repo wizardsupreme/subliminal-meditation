@@ -91,20 +91,20 @@ Features are configurable in `config/site_info.yaml`. Default features include:
 
 Copy `.env.sample` to `.env` and configure:
 
-```ini
-# Flask Configuration
-FLASK_ENV=development
-FLASK_APP=run.py
-SECRET_KEY=your-secret-key
+   ```ini
+   # Flask Configuration
+   FLASK_ENV=development
+   FLASK_APP=run.py
+   SECRET_KEY=your-secret-key
 
 # Firebase Configuration
-FIREBASE_API_KEY=your-api-key
-FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_STORAGE_BUCKET=your-bucket
-FIREBASE_MESSAGING_SENDER_ID=your-sender-id
-FIREBASE_APP_ID=your-app-id
-FIREBASE_MEASUREMENT_ID=your-measurement-id
+   FIREBASE_API_KEY=your-api-key
+   FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+   FIREBASE_PROJECT_ID=your-project-id
+   FIREBASE_STORAGE_BUCKET=your-bucket
+   FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+   FIREBASE_APP_ID=your-app-id
+   FIREBASE_MEASUREMENT_ID=your-measurement-id
 
 # OpenAI Configuration (for commit messages)
 OPENAI_API_KEY=your-openai-key
@@ -439,7 +439,7 @@ feat: add user authentication
 fix(auth): handle expired tokens
 docs(readme): update installation steps
 style: format with black
-```
+``` 
 
 ## 🔒 CodeQL Security Analysis
 
