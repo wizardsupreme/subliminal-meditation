@@ -6,7 +6,7 @@
 /* Theme toggle button */
 .theme-toggle {
     position: fixed;
-    bottom: 2rem;
+    top: 1rem;
     right: 2rem;
     width: 3rem;
     height: 3rem;
@@ -93,6 +93,18 @@ body {
 
 .dark-mode .card-header h4 {
     color: #212121 !important;  /* Keep dark text on light backgrounds in dark mode */
+}
+
+.bg-success h5,
+.bg-success i,
+.bg-success p {
+    color: #FFFFFF !important;  /* White text on success background */
+}
+
+/* Dark mode specific overrides */
+.dark-mode .card-header.bg-primary h4,
+.dark-mode .card-header.bg-primary i {
+    color: #FFFFFF !important;  /* White text for Profile header in dark mode */
 }
 
 /* Navbar theming */
