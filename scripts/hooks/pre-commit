@@ -558,6 +558,23 @@ def main():
     except FileNotFoundError:
         print_warning("CodeQL hook not found. Skipping CodeQL analysis.")
 
+    # Generate changelog
+    print_header("\nUpdating changelog...")
+    try:
+        changelog_script = os.path.join(os.path.dirname(__file__), '..', 'generate_changelog.py')
+        if os.path.exists(changelog_script):
+            subprocess.run([sys.executable, changelog_script], check=True)
+            subprocess.run(['git', 'add', 'CHANGELOG.md'], check=True)
+            print_success("Successfully updated changelog.")
+        else:
+            print_warning("Changelog script not found. Skipping changelog update.")
+    except subprocess.CalledProcessError as e:
+        print_warning(f"Failed to update changelog: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print_warning(f"Unexpected error updating changelog: {e}")
+        sys.exit(1)
+
     print(f"\n{GREEN}✨ All pre-commit checks and fixes completed successfully!{RESET}")
 
 if __name__ == "__main__":

@@ -1,166 +1,123 @@
 """Generate changelog entries using conventional commits and OpenAI."""
 import os
+import sys
 import subprocess
 from datetime import datetime
-import re
-
-from dotenv import load_dotenv
 from openai import OpenAI
-
-load_dotenv()
-
-# Configure OpenAI
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-
 def get_commits_since_last_tag():
     """Get all commits since the last tag."""
     try:
         # Get the last tag
         last_tag = subprocess.check_output(
             ['git', 'describe', '--tags', '--abbrev=0'],
-            stderr=subprocess.DEVNULL
-        ).decode('ascii').strip()
-
-        # Get commits since last tag
-        commits = subprocess.check_output(
-            ['git', 'log', f'{last_tag}..HEAD', '--pretty=format:%s|%h'],
-            stderr=subprocess.DEVNULL
-        ).decode('ascii').strip()
+            text=True
+        ).strip()
     except subprocess.CalledProcessError:
         # If no tags exist, get all commits
-        commits = subprocess.check_output(
-            ['git', 'log', '--pretty=format:%s|%h']
-        ).decode('ascii').strip()
-
-    return commits.split('\n') if commits else []
-
+        return subprocess.check_output(
+            ['git', 'log', '--pretty=format:%s'],
+            text=True
+        ).splitlines()
+    # Get commits since last tag
+    return subprocess.check_output(
+        ['git', 'log', f'{last_tag}..HEAD', '--pretty=format:%s'],
+        text=True
+    ).splitlines()
 def categorize_commits(commits):
     """Categorize commits based on conventional commit messages."""
     categories = {
-        'feat': [],
-        'fix': [],
-        'docs': [],
-        'style': [],
-        'refactor': [],
-        'perf': [],
-        'test': [],
-        'build': [],
-        'ci': [],
-        'chore': [],
-        'other': []
+        'Features': [],
+        'Bug Fixes': [],
+        'Documentation': [],
+        'Style': [],
+        'Refactoring': [],
+        'Performance': [],
+        'Tests': [],
+        'Build': [],
+        'CI': [],
+        'Chores': [],
+        'Reverts': []
     }
-
     for commit in commits:
-        message, sha = commit.split('|')
-        match = re.match(r'^(\w+)(?:\(.*?\))?: (.+)$', message)
-        if match:
-            type_, desc = match.groups()
-            if type_ in categories:
-                categories[type_].append((desc, sha))
-            else:
-                categories['other'].append((message, sha))
-        else:
-            categories['other'].append((message, sha))
-
-    return categories
-
-def generate_ai_summary(commits_by_category):
+        if commit.startswith('feat'):
+            categories['Features'].append(commit)
+        elif commit.startswith('fix'):
+            categories['Bug Fixes'].append(commit)
+        elif commit.startswith('docs'):
+            categories['Documentation'].append(commit)
+        elif commit.startswith('style'):
+            categories['Style'].append(commit)
+        elif commit.startswith('refactor'):
+            categories['Refactoring'].append(commit)
+        elif commit.startswith('perf'):
+            categories['Performance'].append(commit)
+        elif commit.startswith('test'):
+            categories['Tests'].append(commit)
+        elif commit.startswith('build'):
+            categories['Build'].append(commit)
+        elif commit.startswith('ci'):
+            categories['CI'].append(commit)
+        elif commit.startswith('chore'):
+            categories['Chores'].append(commit)
+        elif commit.startswith('revert'):
+            categories['Reverts'].append(commit)
+        return {k: v for k, v in categories.items() if v}
+def generate_ai_summary(commits):
     """Generate an AI-powered summary of changes."""
-    changes_text = ""
-    for category, commits in commits_by_category.items():
-        if commits:
-            changes_text += f"\n{category}:\n"
-            for desc, sha in commits:
-                changes_text += f"- {desc} ({sha})\n"
-
-    prompt = (
-        "Given these git commits, write a concise, user-friendly changelog summary.\n"
-        "Focus on the most important changes and their impact on users.\n"
-        "Keep technical details minimal unless they're important for users.\n\n"
-        f"Commits:\n{changes_text}\n\n"
-        "Write the summary in this format:\n"
-        "## What's New\n"
-        "[Major new features and improvements]\n\n"
-        "## Bug Fixes\n"
-        "[Important fixes that affect users]\n\n"
-        "## Other Changes\n"
-        "[Other noteworthy changes]"
-    )
-
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        print("No OpenAI API key found. Skipping AI summary.", file=sys.stderr)
+        return None
     try:
+        client = OpenAI()  # The API key will be read from environment variable
+        prompt = f"""Summarize the following git commits in a concise paragraph:
+        {commits}
+    Focus on the key changes and their impact. Keep it brief but informative."""
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a helpful changelog writer. "
-                        "Write clear, concise summaries focused on user impact."
-                    )
-                },
-                {"role": "user", "content": prompt}
-            ]
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=200,
+            temperature=0.7
         )
         return response.choices[0].message.content
     except Exception as e:
-        print(f"Error generating AI summary: {e}")
+        print(f"Error generating AI summary: {e}", file=sys.stderr)
         return None
-
-def update_changelog(version, ai_summary, commits_by_category):
+def update_changelog(categories, ai_summary=None):
     """Update CHANGELOG.md with new entries."""
-    changelog_path = 'CHANGELOG.md'
     date = datetime.now().strftime('%Y-%m-%d')
-
-    # Prepare new content
-    new_content = f"# {version} ({date})\n\n"
-
+    content = f"## [{date}]\n\n"
     if ai_summary:
-        new_content += f"{ai_summary}\n\n"
-
-    new_content += "## Detailed Changes\n\n"
-    for category, commits in commits_by_category.items():
+        content += f"### Summary\n{ai_summary}\n\n"
+    for category, commits in categories.items():
         if commits:
-            new_content += f"### {category.title()}\n"
-            for desc, sha in commits:
-                new_content += f"- {desc} ({sha})\n"
-            new_content += "\n"
-
-    # Read existing changelog
+            content += f"### {category}\n"
+            for commit in commits:
+                content += f"- {commit}\n"
+            content += "\n"
+        # Read existing changelog
     try:
-        with open(changelog_path, 'r', encoding='utf-8') as f:
-            existing_content = f.read()
+        with open('CHANGELOG.md', 'r', encoding='utf-8') as f:
+            old_content = f.read()
     except FileNotFoundError:
-        existing_content = "# Changelog\n\n"
-
-    # Combine new and existing content
-    with open(changelog_path, 'w', encoding='utf-8', newline='\n') as f:
-        if "# Changelog" in existing_content:
-            header, rest = existing_content.split("# Changelog\n\n", 1)
-            f.write(f"{header}# Changelog\n\n{new_content}{rest}")
-        else:
-            f.write(f"# Changelog\n\n{new_content}{existing_content}")
-
+        old_content = "# Changelog\n\nAll notable changes to this project will be documented in this file.\n\n"
+        # Insert new changes after the header
+    header_end = old_content.find('\n\n')
+    if header_end == -1:
+        header_end = len(old_content)
+    new_content = old_content[:header_end + 2] + content + old_content[header_end + 2:]
+    # Write updated changelog
+    with open('CHANGELOG.md', 'w', encoding='utf-8') as f:
+        f.write(new_content)
 def main():
     """Main function to generate changelog."""
     commits = get_commits_since_last_tag()
     if not commits:
-        print("No new commits found")
+        print("No new commits to add to changelog")
         return
-
-    commits_by_category = categorize_commits(commits)
-    ai_summary = generate_ai_summary(commits_by_category)
-
-    # Get current version
-    try:
-        version = subprocess.check_output(
-            ['git', 'describe', '--tags', '--abbrev=0'],
-            stderr=subprocess.DEVNULL
-        ).decode('ascii').strip()
-    except subprocess.CalledProcessError:
-        version = "Unreleased"
-
-    update_changelog(version, ai_summary, commits_by_category)
-    print(f"Changelog updated for version {version}")
-
-if __name__ == "__main__":
+    categories = categorize_commits(commits)
+    ai_summary = generate_ai_summary('\n'.join(commits))
+    update_changelog(categories, ai_summary)
+    print("Successfully updated CHANGELOG.md")
+if __name__ == '__main__':
     main()
