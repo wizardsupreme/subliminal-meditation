@@ -58,10 +58,22 @@ class ThemeSwitcher {
     updateButtonIcon(theme) {
         const button = document.getElementById('theme-toggle');
         if (button) {
-            // Update button icon and aria-label
-            button.innerHTML = theme === 'dark' 
-                ? '☀️' 
-                : '🌙';
+            // Update button icon
+            const icon = theme === 'dark' 
+                ? '<i class="fas fa-sun"></i>' 
+                : '<i class="fas fa-moon"></i>';
+            
+            // Update button classes
+            if (theme === 'dark') {
+                button.classList.remove('btn-dark');
+                button.classList.add('btn-light');
+            } else {
+                button.classList.remove('btn-light');
+                button.classList.add('btn-dark');
+            }
+            
+            // Update icon and aria-label
+            button.innerHTML = icon;
             button.setAttribute('aria-label', 
                 theme === 'dark' 
                     ? 'Switch to light mode' 

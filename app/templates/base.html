@@ -97,59 +97,38 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            <div class="row w-100 align-items-center">
-                <!-- Theme Toggle (Left) -->
-                <div class="col-auto">
-                    <button id="theme-toggle" 
-                            class="btn btn-dark btn-sm rounded-circle"
-                            aria-label="Toggle dark mode"
-                            data-bs-toggle="tooltip"
-                            data-bs-placement="bottom"
-                            title="Toggle theme"
-                            onclick="themeSwitcher.toggleTheme()">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                </div>
+            <!-- Brand (Left) -->
+            <a class="navbar-brand me-auto" href="{{ url_for('main.index') }}">
+                <i class="fas fa-spa me-2"></i>
+                Subliminal Meditation
+            </a>
 
-                <!-- Brand (Center) -->
-                <div class="col text-center">
-                    <a class="navbar-brand" href="{{ url_for('main.index') }}">
-                        <i class="fas fa-spa me-2"></i>
-                        Subliminal Meditation
-                    </a>
-                </div>
-
-                <!-- Hamburger Menu (Right) -->
-                <div class="col-auto">
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" 
-                            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                </div>
-            </div>
+            <!-- Hamburger Menu -->
+            <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" 
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
             
             <!-- Menu Content -->
             <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav ms-auto">
                     {% if session.get('user_id') %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('main.dashboard') }}">
                             <i class="fas fa-chart-line me-2"></i>Dashboard
                         </a>
                     </li>
-                    {% endif %}
-                    {% if session.get('user_id') %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.logout') }}">
-                                <i class="fas fa-sign-out-alt me-2"></i>Logout
-                            </a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.login') }}">
-                                <i class="fas fa-sign-in-alt me-2"></i>Login
-                            </a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                    </li>
                     {% endif %}
                 </ul>
             </div>
@@ -173,6 +152,20 @@
             </span>
         </div>
     </footer>
+
+    <!-- Theme Toggle -->
+    <div class="container">
+        <button id="theme-toggle" 
+                class="btn btn-dark btn-sm rounded-circle position-fixed bottom-0 end-0 mb-4 me-4 shadow"
+                style="z-index: 1030;"
+                aria-label="Toggle dark mode"
+                data-bs-toggle="tooltip"
+                data-bs-placement="left"
+                title="Toggle theme"
+                onclick="themeSwitcher.toggleTheme()">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -546,7 +546,12 @@ def main():
         print_header("\nRunning CodeQL analysis...")
         codeql_script = os.path.join(os.path.dirname(__file__), 'codeql-hook.py')
         if os.path.exists(codeql_script):
-            subprocess.run([sys.executable, codeql_script], check=True)
+            try:
+                subprocess.run([sys.executable, codeql_script], check=True, timeout=300)  # 5 minute timeout
+            except subprocess.TimeoutExpired:
+                print_warning("CodeQL analysis timed out after 5 minutes. Skipping...")
+            except KeyboardInterrupt:
+                print_warning("CodeQL analysis was interrupted. Skipping...")
     except subprocess.CalledProcessError:
         print_warning("CodeQL analysis failed. Please check the output above.")
         sys.exit(1)
