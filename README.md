@@ -1,162 +1,432 @@
-# Flask Application Template with Firebase Auth
+# Subliminal Meditation App
 
-A production-ready Flask application template with Firebase Authentication, ready to deploy on Render.
+A powerful meditation app with subliminal messaging capabilities, built with Flask and Firebase.
 
-## Quick Start with Cursor
+## 🚀 Quick Start Guide
 
-1. **Create from Template**
-   - Visit [Flask-Firebase-Template](https://github.com/wizardsupreme/flask-firebase-template)
-   - Click "Use this template" button
-   - Name your repository and create it
+```bash
+# 1. Clone the repository
+git clone https://github.com/yourusername/subliminal-meditation.git
+cd subliminal-meditation
 
-2. **Open in Cursor**
-   - Open Cursor
-   - Select "Clone Repository"
-   - Paste your new repository URL
+# 2. Set up Python environment
+python -m venv venv
+.\venv\Scripts\activate  # Windows
+source venv/bin/activate # Linux/MacOS
 
-3. **Useful Prompts for Cursor AI**
-   ```
-   "Help me set up Firebase configuration for this app"
-   "Add a new protected route for [your feature]"
-   "Create a new template page for [your feature]"
-   "Help me style the [component] using Bootstrap"
-   "Add form validation to [form name]"
-   ```
+# 3. Install dependencies and set up project
+python scripts/setup.sh  # This installs everything you need
 
-## Features
+# 4. Set up your environment variables
+cp .env.sample .env
+# Edit .env with your actual values
 
-- 🔐 Firebase Authentication (Google Sign-in)
-- 🚀 Ready to deploy on Render
-- 🎨 Bootstrap 5 + Font Awesome
-- 🔒 Environment variables configuration
-- 🖼️ Default avatar handling
-- 📱 Responsive design
+# 5. Run the application
+python run.py
+```
 
-## Project Structure
+That's it! Visit `http://localhost:5000` to see your app running.
+
+## 🔧 What Gets Set Up
+
+When you run the quick start commands above, the following happens automatically:
+
+
+1. All Python dependencies are installed
+2. Git hooks are set up for:
+   * Code quality checks (pre-commit)
+   * Conventional commit messages
+   * Auto-updates after pulls
+3. File permissions are configured correctly
+4. Basic project structure is verified
+
+## 🎯 Features
+
+* 🧘‍♂️ Meditation session management
+* 🎵 Background sound mixing
+* 🔐 Firebase Authentication
+* 📱 Responsive design
+* 🎨 Modern UI with Bootstrap 5
+* 🚀 Production-ready configuration
+
+## 📁 Project Structure
+
 ```
 .
-├── app/
-│   ├── __init__.py          # App initialization
-│   ├── routes/
-│   │   ├── auth.py          # Authentication routes
-│   │   └── main.py          # Main application routes
-│   ├── static/
-│   │   ├── css/
-│   │   │   └── style.css    # Custom styles
-│   │   ├── js/
-│   │   │   └── main.js      # Custom JavaScript
-│   │   └── img/
-│   │       ├── favicon.ico   # Site favicon
-│   │       └── default-avatar.png
-│   └── templates/
-│       ├── base.html        # Base template
-│       ├── index.html       # Landing page
-│       ├── login.html       # Login page
-│       └── dashboard.html   # User dashboard
-├── config.py                # Configuration settings
-├── run.py                   # Application entry point
-├── requirements.txt         # Python dependencies
-├── runtime.txt             # Python version
-└── render.yaml             # Render deployment config
+├── app/                    # Main application package
+│   ├── __init__.py        # App initialization
+│   ├── routes/            # Application routes
+│   │   ├── auth.py        # Authentication routes
+│   │   └── main.py        # Main application routes
+│   ├── static/            # Static files
+│   │   ├── css/          # Stylesheets
+│   │   ├── js/           # JavaScript files
+│   │   ├── sounds/       # Meditation sounds
+│   │   └── img/          # Images and icons
+│   └── templates/         # Jinja2 templates
+├── scripts/               # Utility scripts
+│   ├── hooks/            # Git hooks
+│   ├── setup.sh          # Setup script
+│   ├── install_hooks.py  # Hook installer
+│   └── hook_utils.py     # Hook utilities
+├── config/               # Configuration files
+│   └── site_info.yaml    # Site configuration
+├── .env.sample          # Environment template
+├── requirements.txt     # Python dependencies
+└── run.py              # Application entry
 ```
 
-## Setup Instructions
+## 🛠️ Development Setup
 
-1. **Firebase Setup**
-   - Create project at [Firebase Console](https://console.firebase.google.com)
-   - Enable Google Authentication:
-     - Go to Authentication → Sign-in method
-     - Enable Google sign-in
-   - Create Web App:
-     - Click gear icon → Project settings
-     - Add web app (</>)
-     - Register app and copy config
-   - Get Admin SDK credentials:
-     - Go to Project settings → Service accounts
-     - Generate new private key
+### Prerequisites
 
-2. **Environment Setup**
+* Python 3.9 or higher
+* Git
+
+### Environment Variables
+
+Copy `.env.sample` to `.env` and configure:
+
+```ini
+# Flask Configuration
+FLASK_ENV=development
+FLASK_APP=run.py
+SECRET_KEY=your-secret-key
+
+# Firebase Configuration
+FIREBASE_API_KEY=your-api-key
+FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_STORAGE_BUCKET=your-bucket
+FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+FIREBASE_APP_ID=your-app-id
+FIREBASE_MEASUREMENT_ID=your-measurement-id
+
+# OpenAI Configuration (for commit messages)
+OPENAI_API_KEY=your-openai-key
+```
+
+### Git Hooks
+
+The project uses several git hooks that are automatically installed:
+
+
+1. **Pre-commit Hook**
+   * Checks code quality
+   * Fixes line endings
+   * Sets correct permissions
+2. **Commit Message Hook**
+   * Enforces conventional commits
+   * Uses OpenAI to suggest messages
+   * Example: `feat(auth): add Google sign-in`
+3. **Post-merge Hook**
+   * Auto-updates hooks after pulls
+   * Notifies of new changes
+
+To reinstall hooks manually:
+
+```bash
+python scripts/install_hooks.py
+```
+
+## 🚀 Git Hooks in Detail
+
+### Installation
+
+Git hooks are installed automatically when you run `scripts/setup.sh`. If you need to install them manually:
+
+```bash
+# Method 1: Using the install script
+python scripts/install_hooks.py
+
+# Method 2: Manual installation
+cp scripts/hooks/* .git/hooks/
+chmod +x .git/hooks/*  # On Unix systems
+```
+
+### How the Hooks Work
+
+
+1. **Pre-commit Hook** (`scripts/hooks/pre-commit`)
+
    ```bash
-   # Create virtual environment
-   python -m venv venv
-   
-   # Activate it
-   source venv/bin/activate  # Linux/Mac
-   venv\Scripts\activate     # Windows
-   
-   # Install dependencies
-   pip install -r requirements.txt
+   # Runs automatically before each commit
+   # You can also run manually:
+   python scripts/hooks/pre-commit
    ```
+   * Checks for secrets in code
+   * Fixes line endings (CRLF → LF)
+   * Sets correct file permissions
+   * Runs pylint on Python files
+   * Auto-fixes common Python style issues
+2. **Commit Message Hook** (`scripts/hooks/commit-msg`)
 
-3. **Environment Variables**
-   Create `.env` file with:
+   ```bash
+   # Runs automatically when you commit
+   # To test a message manually:
+   echo "your message" | python scripts/hooks/commit-msg
+   ```
+   * Enforces conventional commit format
+   * Uses OpenAI to suggest better messages
+   * Blocks commits with invalid messages
+3. **Post-merge Hook** (`scripts/hooks/post-merge`)
+
+   ```bash
+   # Runs automatically after git pull/merge
+   # To run manually:
+   python scripts/hooks/post-merge
+   ```
+   * Auto-updates hooks after pulls
+   * Shows desktop notifications
+   * Verifies project setup
+
+### Troubleshooting Hooks
+
+If hooks aren't running:
+
+
+1. Check they're executable: `ls -l .git/hooks/`
+2. Verify installation: `python scripts/verify_setup.py`
+3. Reinstall: `python scripts/install_hooks.py`
+
+If you get "ModuleNotFoundError: No module named 'scripts'":
+
+
+1. Make sure you're in the project root directory
+2. Add the project root to PYTHONPATH:
+
+   ```bash
+   # Linux/MacOS
+   export PYTHONPATH=$PYTHONPATH:$(pwd)
+   
+   # Windows PowerShell
+   $env:PYTHONPATH += ";$(pwd)"
+   
+   # Windows CMD
+   set PYTHONPATH=%PYTHONPATH%;%CD%
+   ```
+3. Or create a `.env` file with:
+
    ```ini
-   # Flask Configuration
-   FLASK_ENV=development
-   FLASK_APP=run.py
-   SECRET_KEY=your-secret-key
-
-   # Firebase Web Configuration
-   FIREBASE_API_KEY=your-api-key
-   FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-   FIREBASE_PROJECT_ID=your-project-id
-   FIREBASE_STORAGE_BUCKET=your-bucket
-   FIREBASE_MESSAGING_SENDER_ID=your-sender-id
-   FIREBASE_APP_ID=your-app-id
-   FIREBASE_MEASUREMENT_ID=your-measurement-id
-
-   # Firebase Admin SDK Configuration
-   FIREBASE_PRIVATE_KEY_ID=your-private-key-id
-   FIREBASE_PRIVATE_KEY="your-private-key"
-   FIREBASE_CLIENT_EMAIL=your-client-email
-   FIREBASE_CLIENT_ID=your-client-id
-   FIREBASE_CLIENT_CERT_URL=your-cert-url
+   PYTHONPATH=${PYTHONPATH}:${PWD}
    ```
 
-## Deployment to Render
+To bypass hooks temporarily:
+
+```bash
+git commit --no-verify -m "feat: your message"
+```
+
+## 💻 Local Development
+
+### Starting the Application
+
+```bash
+# 1. Activate your virtual environment
+.\venv\Scripts\activate  # Windows
+source venv/bin/activate # Linux/MacOS
+
+# 2. Start the development server
+python run.py  # Basic way
+# OR with Flask debug mode
+export FLASK_DEBUG=1  # Linux/MacOS
+set FLASK_DEBUG=1     # Windows
+flask run
+
+# The app will be available at:
+# http://localhost:5000
+```
+
+### Development Features
+
+* **Hot Reload**: Changes to Python files trigger automatic restart
+* **Debug Mode**: Detailed error pages with interactive debugger
+* **Asset Compilation**: CSS/JS files are automatically recompiled
+
+### Utility Scripts
+
+The project includes several utility scripts for development:
+
+
+1. **Avatar Setup** (`scripts/setup_avatar.py`)
+
+   ```bash
+   python scripts/setup_avatar.py
+   ```
+   * Sets up default avatar for users without profile pictures
+   * Creates necessary directories in `app/static/img/avatars`
+   * Downloads and processes a default meditation-themed avatar
+   * Useful when:
+     * Setting up a new development environment
+     * Resetting avatars to default state
+     * Testing user profile features
+2. **Favicon Generation** (`scripts/create_favicon.py`)
+
+   ```bash
+   python scripts/create_favicon.py
+   ```
+   * Generates the app's favicon with the meditation lotus symbol
+   * Creates favicons in multiple sizes (16x16, 32x32, 48x48)
+   * Outputs files to `app/static/img/favicon/`:
+     * `favicon.ico` - Main favicon file
+     * `favicon-16x16.png` - For modern browsers
+     * `favicon-32x32.png` - For high-DPI displays
+     * `apple-touch-icon.png` - For iOS devices
+   * Run this script when:
+     * Modifying the app's branding
+     * Setting up a new environment
+     * Favicon files are missing or corrupted
+3. **Version Management** (`scripts/manage_version.py`)
+
+   ```bash
+   # Show current version and last release date
+   python scripts/manage_version.py info
+   
+   # Bump version (updates version.txt and git tags)
+   python scripts/manage_version.py bump patch  # 1.0.0 -> 1.0.1
+   python scripts/manage_version.py bump minor  # 1.0.1 -> 1.1.0
+   python scripts/manage_version.py bump major  # 1.1.0 -> 2.0.0
+   
+   # Create a new release (combines bump and changelog)
+   python scripts/manage_version.py release patch
+   ```
+   * Manages semantic versioning for the project
+   * Updates `version.txt` automatically
+   * Creates git tags for each version
+   * Integrates with changelog generation
+   * Use before:
+     * Creating a new release
+     * Deploying major features
+     * Publishing to production
+4. **Changelog Generation** (`scripts/generate_changelog.py`)
+
+   ```bash
+   # Generate full changelog
+   python scripts/generate_changelog.py
+   
+   # Generate changelog for specific version
+   python scripts/generate_changelog.py --version v1.0.0
+   
+   # Preview changelog without writing to file
+   python scripts/generate_changelog.py --dry-run
+   ```
+   * Automatically generates CHANGELOG.md from commit history
+   * Groups changes by type (features, fixes, etc.)
+   * Uses conventional commits to categorize changes
+   * Includes:
+     * New features and enhancements
+     * Bug fixes and patches
+     * Breaking changes and deprecations
+     * Links to related issues and PRs
+   * Run this script:
+     * Before creating a new release
+     * After significant changes
+     * When updating documentation
+
+### Common Development Tasks
+
+```bash
+# Install new dependencies
+pip install new-package
+pip freeze > requirements.txt
+
+# Run tests
+python -m pytest
+
+# Check code style
+pylint app/
+black app/
+
+# Fix line endings
+python scripts/fix_line_endings.py
+```
+
+## 🚀 Deployment
+
+### Option 1: Deploy to Render (Recommended)
+
 
 1. Push your code to GitHub
-2. Create a new Web Service on Render
+2. Visit [Render](https://render.com) and create a new Web Service
 3. Connect your GitHub repository
-4. Add environment variables:
-   - Go to Dashboard → Environment
-   - Add all variables from your `.env` file
-5. Deploy!
+4. Configure environment:
+   * Build Command: `pip install -r requirements.txt`
+   * Start Command: `gunicorn run:app`
+   * Add all variables from your `.env`
+5. Click Deploy!
 
-## Common Customizations
+### Option 2: Deploy to Your Server
 
-### Adding a New Feature
-1. Create route in `app/routes/your_feature.py`:
-   ```python
-   from flask import Blueprint, render_template
-   from app.routes.auth import login_required
 
-   bp = Blueprint('your_feature', __name__)
+1. Clone the repository on your server
+2. Install dependencies:
 
-   @bp.route('/your-feature')
-   @login_required
-   def your_feature():
-       return render_template('your_feature.html')
+   ```bash
+   python -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+3. Set up environment variables
+4. Run with gunicorn:
+
+   ```bash
+   gunicorn run:app
    ```
 
-2. Register in `app/__init__.py`:
-   ```python
-   from app.routes import your_feature
-   app.register_blueprint(your_feature.bp)
+## 📝 Contributing
+
+
+1. Fork the repository
+2. Create your feature branch:
+
+   ```bash
+   git checkout -b feat/amazing-feature
    ```
+3. Commit your changes:
 
-3. Create template in `app/templates/your_feature.html`:
-   ```html
-   {% extends "base.html" %}
-   {% block content %}
-     <!-- Your content here -->
-   {% endblock %}
+   ```bash
+   git commit -m "feat: add amazing feature"
    ```
+4. Push to the branch:
 
-## Contributing
+   ```bash
+   git push origin feat/amazing-feature
+   ```
+5. Open a Pull Request
 
-Pull requests are welcome! For major changes, please open an issue first.
+## 📜 License
 
-## License
+[MIT](LICENSE) - Feel free to use this project for your own purposes.
 
-[MIT](https://choosealicense.com/licenses/mit/) 
+## Commit Message Convention
+
+This project follows [Conventional Commits](https://www.conventionalcommits.org/). Each commit message should be structured as follows:
+
+```
+<type>[optional scope]: <description>
+```
+
+### Types
+
+* `feat`: New feature
+* `fix`: Bug fix
+* `docs`: Documentation change
+* `style`: Code style change
+* `refactor`: Code refactoring
+* `perf`: Performance improvement
+* `test`: Adding missing tests
+* `build`: Build system changes
+* `ci`: CI configuration changes
+* `chore`: Maintenance tasks
+* `revert`: Revert a previous commit
+
+### Examples
+
+```
+feat: add user authentication
+fix(auth): handle expired tokens
+docs(readme): update installation steps
+style: format with black
+```
+
+
