@@ -100,14 +100,14 @@
             </a>
             <div class="navbar-nav ms-auto d-flex align-items-center">
                 <button id="theme-toggle" 
-                        class="btn btn-link nav-link px-2"
+                        class="btn btn-link nav-link px-2 rounded-circle bg-dark"
                         aria-label="Toggle dark mode"
                         onclick="themeSwitcher.toggleTheme()">
-                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-moon text-white"></i>
                 </button>
                 {% if session.get('user_id') %}
                     <a class="btn btn-link nav-link px-2" href="{{ url_for('auth.logout') }}" title="Logout">
-                        <i class="fas fa-door-open"></i>
+                        <i class="fas fa-sign-out-alt"></i>
                     </a>
                 {% else %}
                     <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>

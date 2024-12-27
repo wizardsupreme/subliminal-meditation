@@ -130,4 +130,42 @@ img {
 
 .dark-mode img:not([src*="dark"]) {
     filter: brightness(0.8) contrast(1.2);
+}
+
+/* Theme-specific text colors */
+.bg-primary h4,
+.bg-primary h5,
+.bg-primary p,
+.bg-primary i,
+.bg-success h4,
+.bg-success h5,
+.bg-success p,
+.bg-success i {
+    color: #FFFFFF !important;  /* White text on colored backgrounds */
+}
+
+/* Keep dark text on light backgrounds in dark mode */
+.dark-mode .bg-light h4,
+.dark-mode .card-header.bg-light h4 {
+    color: #212121 !important;
+}
+
+/* Theme-specific button colors */
+.btn-link {
+    color: var(--text-primary);
+}
+
+.btn-link:hover {
+    color: var(--primary-color);
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+}
+
+.theme-toggle i {
+    font-size: 1rem;
 } 
