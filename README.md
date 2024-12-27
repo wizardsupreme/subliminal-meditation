@@ -1,12 +1,12 @@
-# Template App
+# About
 
-A powerful meditation app with subliminal messaging capabilities, built with Flask and Firebase.
+A powerful app with firebase backed authentication capabilities, built with Flask and Firebase. Uses best practices.
 
 ## 🚀 Quick Start Guide
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/wizardsupreme/flask-firebase-template.git
+git clone https://github.com/wizardsupreme/subliminal-meditation.git
 cd subliminal
 
 # 2. Set up Python environment
@@ -33,6 +33,7 @@ Visit `http://localhost:5000` to see your app running.
 ## 🔧 What Gets Set Up
 
 When you run the quick start commands above, the following happens automatically:
+
 
 
 1. All Python dependencies are installed
@@ -114,6 +115,7 @@ OPENAI_API_KEY=your-openai-key
 The project uses several git hooks that are automatically installed:
 
 
+
 1. **Pre-commit Hook**
    * Checks code quality
    * Fixes line endings
@@ -148,6 +150,7 @@ chmod +x .git/hooks/*  # On Unix systems
 ```
 
 ### How the Hooks Work
+
 
 
 1. **Pre-commit Hook** (`scripts/hooks/pre-commit`)
@@ -188,11 +191,13 @@ chmod +x .git/hooks/*  # On Unix systems
 If hooks aren't running:
 
 
+
 1. Check they're executable: `ls -l .git/hooks/`
 2. Verify installation: `python scripts/verify_setup.py`
 3. Reinstall: `python scripts/install_hooks.py`
 
 If you get "ModuleNotFoundError: No module named 'scripts'":
+
 
 
 1. Make sure you're in the project root directory
@@ -249,6 +254,7 @@ flask run
 ### Utility Scripts
 
 The project includes several utility scripts for development:
+
 
 
 1. **Avatar Setup** (`scripts/setup_avatar.py`)
@@ -349,6 +355,7 @@ python scripts/fix_line_endings.py
 ### Option 1: Deploy to Render (Recommended)
 
 
+
 1. Push your code to GitHub
 2. Visit [Render](https://render.com) and create a new Web Service
 3. Connect your GitHub repository
@@ -359,6 +366,7 @@ python scripts/fix_line_endings.py
 5. Click Deploy!
 
 ### Option 2: Deploy to Your Server
+
 
 
 1. Clone the repository on your server
@@ -377,6 +385,7 @@ python scripts/fix_line_endings.py
    ```
 
 ## 📝 Contributing
+
 
 
 1. Fork the repository
@@ -438,20 +447,22 @@ The project includes local CodeQL analysis in the pre-commit hooks. This helps c
 
 ### Setting up CodeQL locally:
 
+
 1. Install the CodeQL CLI:
+
    ```bash
    # On Windows (using Chocolatey)
    choco install codeql
-
+   
    # On macOS (using Homebrew)
    brew install codeql
-
+   
    # On Linux (manual installation)
    # Download from https://github.com/github/codeql-cli-binaries/releases
    # Extract and add to PATH
    ```
-
 2. Verify installation:
+
    ```bash
    codeql --version
    ```
@@ -459,30 +470,108 @@ The project includes local CodeQL analysis in the pre-commit hooks. This helps c
 ### What gets analyzed:
 
 The CodeQL hook checks for:
-- Security vulnerabilities
-- Code quality issues
-- Common coding mistakes
-- Language-specific best practices
+
+* Security vulnerabilities
+* Code quality issues
+* Common coding mistakes
+* Language-specific best practices
 
 Currently supported languages:
-- Python
-- JavaScript/TypeScript
-- Java
-- C/C++
+
+* Python
+* JavaScript/TypeScript
+* Java
+* C/C++
 
 ### Customizing CodeQL Analysis:
 
 You can customize the analysis by modifying `scripts/hooks/codeql-hook.py`:
-- Add/remove languages in the `create_database` function
-- Change query suites in the `run_analysis` function
-- Adjust severity thresholds
-- Add custom queries
+
+* Add/remove languages in the `create_database` function
+* Change query suites in the `run_analysis` function
+* Adjust severity thresholds
+* Add custom queries
 
 ### Skipping CodeQL Analysis:
 
 For quick commits where CodeQL analysis isn't needed:
+
 ```bash
 git commit --no-verify -m "your message"
+```
+
+## 🛡️ Code Quality Standards
+
+This repository maintains high code quality standards through automated checks and fixes. Our pre-commit hooks automatically enforce these standards before each commit.
+
+### Coding Standards
+
+1. **Security Best Practices** (enforced by CodeQL):
+   - Prevention of SQL/Command injection vulnerabilities
+   - Secure file path handling
+   - Safe data deserialization
+   - Proper session management
+   - CSRF protection
+   - Secure HTTP header handling
+   - Input validation and sanitization
+
+2. **Code Style and Quality**:
+   - Automated import optimization
+   - Proper line endings (LF)
+   - Consistent indentation (4 spaces)
+   - No unused imports or variables
+   - Single newline at end of files
+   - No trailing whitespace
+   - Clean block structure
+
+3. **Resource Management**:
+   - Context managers for file operations
+   - Secure subprocess handling
+   - Proper resource cleanup
+   - Exception safety
+
+4. **Documentation**:
+   - Required function docstrings
+   - Type annotations
+   - Parameter descriptions
+   - Return type documentation
+
+### Automated Fixes
+
+The pre-commit hooks automatically fix common issues:
+
+```bash
+# Commit your changes
+git add .
+git commit -m "your message"
+
+# The pre-commit hook will automatically:
+✓ Fix code style issues
+✓ Remove unused imports
+✓ Fix line endings
+✓ Set correct file permissions
+✓ Run security checks (CodeQL)
+✓ Run pylint checks
+```
+
+To skip the automated fixes (not recommended):
+```bash
+git commit --no-verify -m "your message"
+```
+
+### Manual Code Quality Checks
+
+You can also run the checks manually:
+
+```bash
+# Run pylint checks
+pylint app/
+
+# Run CodeQL analysis
+python scripts/hooks/codeql-hook.py
+
+# Fix Python style issues
+python scripts/hooks/pre-commit
 ```
 
 
