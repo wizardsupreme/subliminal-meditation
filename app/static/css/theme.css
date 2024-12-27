@@ -84,6 +84,17 @@ body {
     transition: all var(--transition-duration) ease;
 }
 
+/* Specific text color overrides */
+.bg-primary h4,
+.bg-primary h5,
+.bg-primary p {
+    color: #FFFFFF !important;  /* White text on blue backgrounds */
+}
+
+.dark-mode .card-header h4 {
+    color: #212121 !important;  /* Keep dark text on light backgrounds in dark mode */
+}
+
 /* Navbar theming */
 .navbar {
     background-color: var(--navbar-bg) !important;
