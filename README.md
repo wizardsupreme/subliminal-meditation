@@ -1,13 +1,13 @@
-# Flask Application Template
+# Subliminal Meditation App
 
-A configurable Flask application template with Firebase integration. Currently configured as a meditation app (see `config/site_info.yaml`).
+A powerful meditation app with subliminal messaging capabilities, built with Flask and Firebase.
 
 ## 🚀 Quick Start Guide
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/wizardsupreme/flask-app-template.git
-cd flask-app-template
+git clone https://github.com/wizardsupreme/subliminal.git
+cd subliminal
 
 # 2. Set up Python environment
 python -m venv venv

@@ -103,5 +103,5 @@ background_sounds:
 # Repository Information
 repository:
   username: "wizardsupreme"
-  name: "flask-app-template"
-  description: "A configurable Flask application template"
+  name: "subliminal"
+  description: "A powerful meditation app with subliminal messaging capabilities, built with Flask and Firebase"
