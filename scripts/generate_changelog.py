@@ -69,10 +69,10 @@ def generate_ai_summary(commits):
         print("No OpenAI API key found. Skipping AI summary.", file=sys.stderr)
         return None
     try:
-        client = OpenAI()  # The API key will be read from environment variable
+        client = OpenAI(api_key=api_key)
         prompt = f"""Summarize the following git commits in a concise paragraph:
         {commits}
-    Focus on the key changes and their impact. Keep it brief but informative."""
+        Focus on the key changes and their impact. Keep it brief but informative."""
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
@@ -105,9 +105,10 @@ def update_changelog(categories, ai_summary=None):
     header_end = old_content.find('\n\n')
     if header_end == -1:
         header_end = len(old_content)
+    # Create new content by combining old and new
     new_content = old_content[:header_end + 2] + content + old_content[header_end + 2:]
     # Write updated changelog
-    with open('CHANGELOG.md', 'w', encoding='utf-8') as f:
+    with open('CHANGELOG.md', 'w', encoding='utf-8', newline='\n') as f:
         f.write(new_content)
 def main():
     """Main function to generate changelog."""
