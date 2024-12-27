@@ -391,8 +391,90 @@ def fix_python_style(file_path: str) -> bool:
         print_warning(f"Error fixing style in {file_path}: {e}")
         return False
 
+def fix_pylint_issues(file_path: str) -> bool:
+    """Fix common pylint issues in Python files."""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        modified = False
+        lines = content.splitlines()
+        
+        # Track imports to remove unused ones
+        imports = {}
+        used_symbols = set()
+        
+        # First pass: collect imports and their usage
+        for i, line in enumerate(lines):
+            # Track imports
+            if line.strip().startswith('from '):
+                parts = line.split('import')
+                if len(parts) == 2:
+                    module = parts[0].replace('from', '').strip()
+                    symbols = [s.strip() for s in parts[1].split(',')]
+                    imports[i] = {'module': module, 'symbols': symbols}
+            
+            # Track symbol usage
+            else:
+                for imp_line in imports.values():
+                    for symbol in imp_line['symbols']:
+                        symbol = symbol.strip()
+                        if symbol in line and not line.strip().startswith('from'):
+                            used_symbols.add(symbol)
+        
+        # Second pass: fix issues
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            
+            # Fix unused imports
+            if i in imports:
+                imp = imports[i]
+                used = [s for s in imp['symbols'] if s.strip() in used_symbols]
+                if used:
+                    lines[i] = f"from {imp['module']} import {', '.join(used)}"
+                    modified = True
+                else:
+                    lines[i] = ''  # Remove unused import
+                    modified = True
+            
+            # Fix missing final newline
+            if i == len(lines) - 1 and line:
+                lines.append('')
+                modified = True
+            
+            i += 1
+        
+        # Remove consecutive blank lines
+        new_lines = []
+        prev_empty = False
+        for line in lines:
+            if line.strip():
+                new_lines.append(line)
+                prev_empty = False
+            elif not prev_empty:
+                new_lines.append(line)
+                prev_empty = True
+        
+        if new_lines != lines:
+            lines = new_lines
+            modified = True
+        
+        if modified:
+            content = '\n'.join(lines)
+            with open(file_path, 'w', encoding='utf-8', newline='\n') as f:
+                f.write(content)
+            subprocess.run(['git', 'add', file_path], check=True)
+            print_success(f"Fixed pylint issues in {format_path(file_path)}")
+            return True
+        
+        return False
+    except Exception as e:
+        print_warning(f"Error fixing pylint issues in {file_path}: {e}")
+        return False
+
 def fix_all_python_files() -> List[str]:
-    """Fix style issues in all staged Python files."""
+    """Fix style and pylint issues in all staged Python files."""
     try:
         # Get staged Python files
         staged = subprocess.check_output(
@@ -402,11 +484,12 @@ def fix_all_python_files() -> List[str]:
         
         fixed_files = []
         for file in staged:
-            if os.path.exists(file) and fix_python_style(file):
-                fixed_files.append(file)
+            if os.path.exists(file):
+                if fix_python_style(file) or fix_pylint_issues(file):
+                    fixed_files.append(file)
         
         if fixed_files:
-            print_info("Fixed style issues in files:")
+            print_info("Fixed style and pylint issues in files:")
             for file in fixed_files:
                 print(f"  {format_path(file)}")
             print("\nStyle fixes have been staged.")
@@ -439,8 +522,8 @@ def main():
         sys.exit(1)
     print(f"{GREEN}✓{RESET} No secrets found")
 
-    # Fix Python style issues
-    print_header("\nFixing Python style issues...")
+    # Fix Python style and pylint issues
+    print_header("\nFixing Python style and pylint issues...")
     fix_all_python_files()
 
     # Fix line endings
