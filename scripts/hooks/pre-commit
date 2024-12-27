@@ -429,13 +429,13 @@ def main():
     print_header("Checking for secrets in staged files...")
     secrets_ok, findings = check_secrets()
     if not secrets_ok:
-        print_warning("\nPotential secrets found:")
+        print_warning("\nPotential secrets found in staged files.")
         for finding in findings:
             print(f"\nFile: {finding['file']}")
-            for secret_type, value, line in finding['secrets']:
-                print(f"  Line {line}: {YELLOW}{secret_type}{RESET}")
-                print(f"  Value: {value[:20]}...")
-        print("\n❌ Commit blocked: Please remove secrets and use environment variables instead")
+            for _, _, line in finding['secrets']:
+                print(f"  Line {line}: {YELLOW}Secret found{RESET}")
+                print(f"  Value: [REDACTED]")
+            print("\n❌ Commit blocked: Please remove secrets and use environment variables instead")
         sys.exit(1)
     print(f"{GREEN}✓{RESET} No secrets found")
 
