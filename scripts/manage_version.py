@@ -43,6 +43,13 @@ def create_tag(version):
     message = f'Release {tag} - {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
 
     try:
+        # Generate changelog first
+        subprocess.run(['python', 'scripts/generate_changelog.py'], check=True)
+
+        # Stage and commit changelog
+        subprocess.run(['git', 'add', 'CHANGELOG.md'], check=True)
+        subprocess.run(['git', 'commit', '-m', f'docs: update changelog for {tag}'], check=True)
+
         # Create tag
         subprocess.run(['git', 'tag', '-a', tag, '-m', message], check=True)
         print(f'Created tag: {tag}')

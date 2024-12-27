@@ -1,13 +1,10 @@
 #!/bin/bash
 
-# Install pylint
-pip install pylint
+# Create hooks directory if it doesn't exist
+mkdir -p .git/hooks
 
-# Install pre-commit
-pip install pre-commit
+# Copy commit-msg hook
+cp scripts/hooks/commit-msg .git/hooks/
+chmod +x .git/hooks/commit-msg
 
-# Install the git hook scripts
-pre-commit install
-
-# Update hooks to the latest version
-pre-commit autoupdate
+echo "Git hooks installed successfully!"
