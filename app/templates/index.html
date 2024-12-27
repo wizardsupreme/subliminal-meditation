@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="text-center">
-    <h1>Welcome to Auth App</h1>
+    <h1>Welcome to {{ config.SITE_NAME }}</h1>
     <p class="lead">Please login to access your dashboard</p>
     {% if not session.get('user_id') %}
         <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
