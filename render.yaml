@@ -1,18 +1,130 @@
 services:
+  # Production Environment (main branch)
   - type: web
     name: subliminal-meditation
     env: python
-    buildCommand: |
-      pip install -r requirements.txt
-      # Store version info during build
-      VERSION_INFO=$(git describe --tags --abbrev=0 2>/dev/null || echo 'dev')-$(git rev-parse --short HEAD)
-      BUILD_DATE=$(date -u '+%d.%m.%y %H:%M UTC')
-      COMMIT_DATE=$(git show -s --format=%ci HEAD)
-      echo "number: $VERSION_INFO" > .version
-      echo "sha: $(git rev-parse --short HEAD)" >> .version
-      echo "build_date: $BUILD_DATE" >> .version
-      echo "commit_date: $COMMIT_DATE" >> .version
-    startCommand: gunicorn run:app
+    region: ohio
+    plan: starter
+    branch: main
+    buildCommand: python setup.py
+    startCommand: gunicorn run:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 120
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.0
+        value: 3.9.18
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_APP
+        value: run.py
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: subliminal-redis-prod
+          property: connectionString
+      - key: FIREBASE_API_KEY
+        sync: false
+      - key: FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_STORAGE_BUCKET
+        sync: false
+      - key: FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: FIREBASE_APP_ID
+        sync: false
+      - key: FIREBASE_MEASUREMENT_ID
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY_ID
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_CLIENT_ID
+        sync: false
+      - key: FIREBASE_CLIENT_CERT_URL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+    scaling:
+      minInstances: 1
+      maxInstances: 3
+      targetMemoryPercent: 80
+      targetCPUPercent: 75
+    healthCheckPath: /health
+    healthCheckTimeout: 5
+    domains:
+      - meditation.exponentials.ai
+
+  # Development Environment (dev branch)
+  - type: web
+    name: subliminal-meditation-dev
+    env: python
+    region: ohio
+    plan: starter
+    branch: dev
+    buildCommand: python setup.py
+    startCommand: gunicorn run:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.18
+      - key: FLASK_ENV
+        value: development
+      - key: FLASK_APP
+        value: run.py
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: subliminal-redis-dev
+          property: connectionString
+      - key: FIREBASE_API_KEY
+        sync: false
+      - key: FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_STORAGE_BUCKET
+        sync: false
+      - key: FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: FIREBASE_APP_ID
+        sync: false
+      - key: FIREBASE_MEASUREMENT_ID
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY_ID
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_CLIENT_ID
+        sync: false
+      - key: FIREBASE_CLIENT_CERT_URL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+    scaling:
+      minInstances: 1
+      maxInstances: 2
+      targetMemoryPercent: 80
+      targetCPUPercent: 75
+    healthCheckPath: /health
+    healthCheckTimeout: 5
+    domains:
+      - dev.meditation.exponentials.ai
+  
+  # Production Redis
+  - type: redis
+    name: subliminal-redis-prod
+    ipAllowList: []
+    plan: starter
+    maxmemoryPolicy: volatile-lru
+    maxmemoryMB: 256
+
+  # Development Redis
+  - type: redis
+    name: subliminal-redis-dev
+    ipAllowList: []
+    plan: starter
+    maxmemoryPolicy: volatile-lru
+    maxmemoryMB: 256

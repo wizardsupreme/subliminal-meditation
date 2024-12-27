@@ -503,10 +503,6 @@ def main():
     """Main function to run pre-commit checks and fixes."""
     # Preserve terminal for interactive prompts
     os.environ['GIT_TERMINAL_PROMPT'] = '1'
-    
-    # Ensure we're running in interactive mode
-    if not sys.stdin.isatty():
-        return run_interactive(__file__)
 
     # Check for secrets first
     print_header("Checking for secrets in staged files...")
@@ -515,67 +511,75 @@ def main():
         print_warning("\nPotential secrets found in staged files.")
         for finding in findings:
             print(f"\nFile: {finding['file']}")
-            for _, _, line in finding['secrets']:
-                print(f"  Line {line}: {YELLOW}Secret found{RESET}")
-                print(f"  Value: [REDACTED]")
-            print("\n❌ Commit blocked: Please remove secrets and use environment variables instead")
-        sys.exit(1)
-    print(f"{GREEN}✓{RESET} No secrets found")
+            for secret_type, secret, line in finding['secrets']:
+                print(f"  {secret_type} found on line {line}")
+        return 1
 
-    # Fix Python style and pylint issues
-    print_header("\nFixing Python style and pylint issues...")
-    fix_all_python_files()
+    print_success("✓ No secrets found")
+    print("\n")
+
+    # Fix Python style issues
+    print_header("Fixing Python style and pylint issues...")
+    try:
+        staged = subprocess.check_output(
+            ['git', 'diff', '--cached', '--name-only', '--diff-filter=ACM', '*.py'],
+            text=True
+        ).splitlines()
+
+        if staged:
+            for file in staged:
+                if fix_python_style(file):
+                    subprocess.run(['git', 'add', file], check=True)
+                    print(f"✓ Fixed style issues in {file}")
+            print("• Fixed style and pylint issues in files:")
+            for file in staged:
+                print(f"  {file}")
+            print("\nStyle fixes have been staged.")
+    except Exception as e:
+        print(f"Error fixing Python style: {e}")
+
+    print("\n")
 
     # Fix line endings
-    print_header("\nFixing line endings in all tracked files...")
-    fix_all_tracked_files()
+    print_header("Fixing line endings in all tracked files...")
+    fixed_files = fix_all_tracked_files()
+    if fixed_files:
+        print("\nFixed line endings in files:")
+        for file in fixed_files:
+            print(f"  {file}")
+        print("\nLine ending fixes have been staged.")
+    print("\n")
 
-    # Fix permissions
-    print_header("\nChecking and fixing file permissions...")
-    set_file_permissions()
+    # Set file permissions
+    print_header("Checking and fixing file permissions...")
+    fixed_files = set_file_permissions()
+    if fixed_files:
+        print("\nFixed permissions in:")
+        for file in fixed_files:
+            print(f"  {file}")
+        print("\nPermission changes have been staged.")
+    print("\n")
 
     # Run pylint
-    print_header("\nRunning pylint checks...")
-    success, message = run_pylint()
-    if not success:
-        print(message)
-        sys.exit(1)
+    print_header("Running pylint checks...")
+    pylint_ok, pylint_output = run_pylint()
+    if not pylint_ok:
+        print(pylint_output)
+        return 1
+    print("\n")
 
     # Run CodeQL analysis
+    print_header("Running CodeQL analysis...")
     try:
-        print_header("\nRunning CodeQL analysis...")
-        codeql_script = os.path.join(os.path.dirname(__file__), 'codeql-hook.py')
-        if os.path.exists(codeql_script):
-            try:
-                subprocess.run([sys.executable, codeql_script], check=True, timeout=300)  # 5 minute timeout
-            except subprocess.TimeoutExpired:
-                print_warning("CodeQL analysis timed out after 5 minutes. Skipping...")
-            except KeyboardInterrupt:
-                print_warning("CodeQL analysis was interrupted. Skipping...")
-    except subprocess.CalledProcessError:
-        print_warning("CodeQL analysis failed. Please check the output above.")
-        sys.exit(1)
-    except FileNotFoundError:
-        print_warning("CodeQL hook not found. Skipping CodeQL analysis.")
-
-    # Generate changelog
-    print_header("\nUpdating changelog...")
-    try:
-        changelog_script = os.path.join(os.path.dirname(__file__), '..', 'generate_changelog.py')
-        if os.path.exists(changelog_script):
-            subprocess.run([sys.executable, changelog_script], check=True)
-            subprocess.run(['git', 'add', 'CHANGELOG.md'], check=True)
-            print_success("Successfully updated changelog.")
-        else:
-            print_warning("Changelog script not found. Skipping changelog update.")
+        subprocess.run(['python', 'scripts/hooks/codeql-hook.py'], check=True)
+        print("✨ CodeQL analysis completed successfully!")
     except subprocess.CalledProcessError as e:
-        print_warning(f"Failed to update changelog: {e}")
-        sys.exit(1)
-    except Exception as e:
-        print_warning(f"Unexpected error updating changelog: {e}")
-        sys.exit(1)
+        print(f"Error running CodeQL analysis: {e}")
+        return 1
+    print("\n")
 
-    print(f"\n{GREEN}✨ All pre-commit checks and fixes completed successfully!{RESET}")
+    print_success("✨ All pre-commit checks and fixes completed successfully!")
+    return 0
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    sys.exit(main())
