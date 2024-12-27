@@ -97,28 +97,36 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            <!-- Theme Toggle (Left) -->
-            <button id="theme-toggle" 
-                    class="btn btn-dark btn-sm rounded-circle"
-                    aria-label="Toggle dark mode"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="bottom"
-                    title="Toggle theme"
-                    onclick="themeSwitcher.toggleTheme()">
-                <i class="fas fa-moon"></i>
-            </button>
+            <div class="row w-100 align-items-center">
+                <!-- Theme Toggle (Left) -->
+                <div class="col-auto">
+                    <button id="theme-toggle" 
+                            class="btn btn-dark btn-sm rounded-circle"
+                            aria-label="Toggle dark mode"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom"
+                            title="Toggle theme"
+                            onclick="themeSwitcher.toggleTheme()">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
 
-            <!-- Brand (Center) -->
-            <a class="navbar-brand mx-auto" href="{{ url_for('main.index') }}">
-                <i class="fas fa-spa me-2"></i>
-                Subliminal Meditation
-            </a>
+                <!-- Brand (Center) -->
+                <div class="col text-center">
+                    <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                        <i class="fas fa-spa me-2"></i>
+                        Subliminal Meditation
+                    </a>
+                </div>
 
-            <!-- Hamburger Menu (Right) -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" 
-                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+                <!-- Hamburger Menu (Right) -->
+                <div class="col-auto">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" 
+                            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                </div>
+            </div>
             
             <!-- Menu Content -->
             <div class="collapse navbar-collapse" id="navbarContent">
