@@ -11,8 +11,6 @@
             <div class="card-body">
                 {% if session.get('user_id') %}
                 <div class="text-center mb-3">
-                    <!-- Debug info in HTML comment -->
-                    <!-- Photo URL: {{ session.get('user_photo') }} -->
                     <img src="{{ session.get('user_photo') }}" 
                          onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/default-avatar.png') }}';"
                          class="rounded-circle profile-image" alt="Profile Picture">
@@ -24,19 +22,6 @@
                 {% endif %}
             </div>
         </div>
-    </div>
-
-    <!-- Top Right Buttons -->
-    <div class="top-right-buttons">
-        <button id="theme-toggle" 
-                class="theme-toggle" 
-                aria-label="Toggle dark mode"
-                onclick="themeSwitcher.toggleTheme()">
-            🌙
-        </button>
-        <a href="{{ url_for('auth.logout') }}" class="btn btn-logout" title="Logout">
-            <i class="fas fa-door-open"></i>
-        </a>
     </div>
     
     <!-- Main Content Area -->
