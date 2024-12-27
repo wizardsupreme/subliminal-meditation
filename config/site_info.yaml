@@ -1,3 +1,107 @@
-company:
-  name: "Exponentials Studio Limited"
-  # year is dynamically set to current year
+# Site Information
+site:
+  name: "Subliminal Meditation App"
+  description: "A powerful meditation app with subliminal messaging capabilities"
+  tagline: "Transform your mind through guided meditation"
+  keywords: ["meditation", "mindfulness", "subliminal", "wellness"]
+  theme: "meditation"
+
+# Features Configuration
+features:
+  - name: "Meditation Sessions"
+    icon: "🧘‍♂️"
+    description: "Manage and track meditation sessions"
+    enabled: true
+
+  - name: "Background Sounds"
+    icon: "🎵"
+    description: "Mix and customize background sounds"
+    enabled: true
+
+  - name: "User Profiles"
+    icon: "👤"
+    description: "Personalized meditation tracking"
+    enabled: true
+
+  - name: "Responsive Design"
+    icon: "📱"
+    description: "Modern UI optimized for all devices"
+    enabled: true
+
+  - name: "Firebase Integration"
+    icon: "🔐"
+    description: "Secure authentication and data storage"
+    enabled: true
+
+# Branding
+branding:
+  primary_color: "#7C4DFF"
+  secondary_color: "#B388FF"
+  accent_color: "#3F51B5"
+  
+  logo:
+    type: "lotus"
+    favicon_sizes: [16, 32, 48]
+    favicon_formats: ["ico", "png"]
+    apple_touch_icon: true
+
+  avatar:
+    default_theme: "meditation"
+    default_path: "app/static/img/avatars/default.png"
+
+# Content Directories
+directories:
+  static:
+    sounds: "app/static/sounds"
+    images: "app/static/img"
+    styles: "app/static/css"
+    scripts: "app/static/js"
+
+# Default Session Settings
+session_defaults:
+  duration_minutes: 20
+  background_volume: 0.5
+  subliminal_volume: 0.3
+  auto_start_delay: 5
+
+# Available Meditation Types
+meditation_types:
+  - name: "Mindfulness"
+    description: "Focus on the present moment"
+    duration_range: [5, 60]
+    
+  - name: "Breathing"
+    description: "Guided breathing exercises"
+    duration_range: [10, 45]
+    
+  - name: "Body Scan"
+    description: "Progressive body awareness"
+    duration_range: [15, 45]
+    
+  - name: "Loving-Kindness"
+    description: "Cultivate compassion and love"
+    duration_range: [10, 30]
+
+# Background Sounds
+background_sounds:
+  - name: "Rain"
+    file: "rain.mp3"
+    category: "Nature"
+    
+  - name: "Ocean Waves"
+    file: "waves.mp3"
+    category: "Nature"
+    
+  - name: "Tibetan Bowls"
+    file: "bowls.mp3"
+    category: "Instruments"
+    
+  - name: "White Noise"
+    file: "white-noise.mp3"
+    category: "Ambient"
+
+# Repository Information
+repository:
+  username: "wizardsupreme"
+  name: "flask-app-template"
+  description: "A configurable Flask application template"
