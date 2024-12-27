@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %} - {{ config.SITE_NAME }}</title>
     
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon/favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/favicon/favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='img/favicon/apple-touch-icon.png') }}">
     
     <!-- Core Stylesheets -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -25,13 +28,13 @@
 
       // Your web app's Firebase configuration
       const firebaseConfig = {
-        apiKey: "AIzaSyCJje8yQsDjGyIno1b-sjx9FnD4Fq7v5s8",
-        authDomain: "subliminal-mediation.firebaseapp.com",
-        projectId: "subliminal-mediation",
-        storageBucket: "subliminal-mediation.firebasestorage.app",
-        messagingSenderId: "103229370513",
-        appId: "1:103229370513:web:841c26f9f1838fc408b1e0",
-        measurementId: "G-J07TH287CZ"
+        apiKey: "{{ config.FIREBASE_CONFIG.apiKey }}",
+        authDomain: "{{ config.FIREBASE_CONFIG.authDomain }}",
+        projectId: "{{ config.FIREBASE_CONFIG.projectId }}",
+        storageBucket: "{{ config.FIREBASE_CONFIG.storageBucket }}",
+        messagingSenderId: "{{ config.FIREBASE_CONFIG.messagingSenderId }}",
+        appId: "{{ config.FIREBASE_CONFIG.appId }}",
+        measurementId: "{{ config.FIREBASE_CONFIG.measurementId }}"
       };
 
       // Initialize Firebase
@@ -94,31 +97,53 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+            <!-- Theme Toggle (Left) -->
+            <button id="theme-toggle" 
+                    class="btn btn-dark btn-sm rounded-circle"
+                    aria-label="Toggle dark mode"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    title="Toggle theme"
+                    onclick="themeSwitcher.toggleTheme()">
+                <i class="fas fa-moon"></i>
+            </button>
+
+            <!-- Brand (Center) -->
+            <a class="navbar-brand mx-auto" href="{{ url_for('main.index') }}">
                 <i class="fas fa-spa me-2"></i>
                 Subliminal Meditation
             </a>
-            <div class="navbar-nav ms-auto d-flex align-items-center">
-                <button id="theme-toggle" 
-                        class="btn btn-dark btn-sm rounded-circle me-2"
-                        aria-label="Toggle dark mode"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        title="Toggle theme"
-                        onclick="themeSwitcher.toggleTheme()">
-                    <i class="fas fa-moon"></i>
-                </button>
-                {% if session.get('user_id') %}
-                    <a class="btn btn-link nav-link ms-2" 
-                       href="{{ url_for('auth.logout') }}" 
-                       data-bs-toggle="tooltip" 
-                       data-bs-placement="bottom" 
-                       title="Exit">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </a>
-                {% else %}
-                    <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
-                {% endif %}
+
+            <!-- Hamburger Menu (Right) -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" 
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Menu Content -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    {% if session.get('user_id') %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.dashboard') }}">
+                            <i class="fas fa-chart-line me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% if session.get('user_id') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </nav>
