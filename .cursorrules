@@ -8,6 +8,17 @@
 - Maximum line length: 100 characters
 - Use meaningful variable and function names
 
+### Python Code Structure Rules
+- Use consistent indentation (4 spaces)
+- Ensure proper code block nesting
+- Never place code after a return statement in the same block
+- Define variables before using them
+- Use blank lines to separate logical code sections
+- Validate variable scope and accessibility
+- Avoid unreachable code
+- Add descriptive comments for complex logic
+- Use early returns to reduce nesting
+
 ## OpenAI Integration
 - Initialize OpenAI client with httpx configuration:
   ```python

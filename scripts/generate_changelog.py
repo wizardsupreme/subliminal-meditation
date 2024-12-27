@@ -11,11 +11,12 @@ load_dotenv()
 def get_current_version():
     """Get the current version from the latest tag."""
     try:
-        # Get the latest tag, removing any 'template-' prefix
+        # Get the latest tag
         tag = subprocess.check_output(
             ['git', 'describe', '--tags', '--abbrev=0'],
             text=True
         ).strip()
+        # Remove any template- prefix from existing tags for backward compatibility
         return tag.replace('template-', '')
     except subprocess.CalledProcessError:
         return "0.0.1"  # Initial version if no tags exist
@@ -181,8 +182,9 @@ def main():
     bump_type = determine_version_bump(commits)
     new_version = bump_version(current_version, bump_type)
     try:
-        subprocess.run(['git', 'tag', f'template-{new_version}', '-m', f'Version {new_version}'], check=True)
-        print(f"Created new tag: template-{new_version}")
+        # Create tag without template- prefix
+        subprocess.run(['git', 'tag', new_version, '-m', f'Version {new_version}'], check=True)
+        print(f"Created new tag: {new_version}")
     except subprocess.CalledProcessError as e:
         print(f"Error creating tag: {e}", file=sys.stderr)
     print("Successfully updated CHANGELOG.md")

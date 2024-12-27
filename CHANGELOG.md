@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0] - 2024-12-27
+
+### Summary
+The git commits focused on updating cursor rules for invoking openAI and implementing semantic versioning for different versions. This allows for more streamlined and organized development, making it easier to track changes and maintain compatibility between different versions. The updates also improve the efficiency of invoking openAI, enhancing the overall functionality of the system.
+
+### Features
+- feat: updated cursorrules on how to invoke openAI and make versions using semVer
+
 ## [0.0.6] - 2024-12-27
 
 ### Summary
