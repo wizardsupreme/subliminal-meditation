@@ -193,9 +193,51 @@ python scripts/install_hooks.py
 
 ## 🚀 Git Hooks in Detail
 
+### Hook Structure
+
+The project uses a combination of direct Git hooks and utility scripts:
+
+1. **Direct Git Hooks** (in `scripts/hooks/`):
+   - `pre-commit`: Runs before each commit
+   - `commit-msg`: Validates commit message format
+   - `post-commit`: Runs after successful commits
+   - `post-merge`: Runs after git pull/merge
+
+2. **Utility Scripts** (in `scripts/`):
+   - `generate_changelog.py`: Called by post-commit hook
+   - `manage_version.py`: Called by post-commit hook
+   - `codeql-hook.py`: Called by pre-commit hook
+
+### Hook Execution Flow
+
+1. **When you stage files and commit (`git commit`)**:
+   - First, `pre-commit` hook runs:
+     * Checks for secrets in code
+     * Fixes line endings (CRLF → LF)
+     * Sets correct file permissions
+     * Runs pylint on Python files
+     * Runs CodeQL analysis (using `codeql-hook.py`)
+
+   - Then, `commit-msg` hook runs:
+     * Validates conventional commit format
+     * Uses OpenAI to suggest better messages
+     * Blocks commits with invalid messages
+
+   - Finally, `post-commit` hook runs:
+     * Checks if it's a conventional commit
+     * For feature/fix/performance changes:
+       - Bumps version (using `manage_version.py`)
+     * Updates changelog (using `generate_changelog.py`)
+
+2. **When you pull/merge (`git pull` or `git merge`)**:
+   - `post-merge` hook runs:
+     * Auto-updates hooks
+     * Shows desktop notifications
+     * Verifies project setup
+
 ### Installation
 
-Git hooks are installed automatically when you run `scripts/setup.sh`. If you need to install them manually:
+Git hooks are installed automatically when you run `scripts/setup.sh`. For manual installation:
 
 ```bash
 # Method 1: Using the install script
@@ -205,41 +247,6 @@ python scripts/install_hooks.py
 cp scripts/hooks/* .git/hooks/
 chmod +x .git/hooks/*  # On Unix systems
 ```
-
-### How the Hooks Work
-
-1. **Pre-commit Hook** (`scripts/hooks/pre-commit`)
-
-   ```bash
-   # Runs automatically before each commit
-   # You can also run manually:
-   python scripts/hooks/pre-commit
-   ```
-   * Checks for secrets in code
-   * Fixes line endings (CRLF → LF)
-   * Sets correct file permissions
-   * Runs pylint on Python files
-   * Auto-fixes common Python style issues
-2. **Commit Message Hook** (`scripts/hooks/commit-msg`)
-
-   ```bash
-   # Runs automatically when you commit
-   # To test a message manually:
-   echo "your message" | python scripts/hooks/commit-msg
-   ```
-   * Enforces conventional commit format
-   * Uses OpenAI to suggest better messages
-   * Blocks commits with invalid messages
-3. **Post-merge Hook** (`scripts/hooks/post-merge`)
-
-   ```bash
-   # Runs automatically after git pull/merge
-   # To run manually:
-   python scripts/hooks/post-merge
-   ```
-   * Auto-updates hooks after pulls
-   * Shows desktop notifications
-   * Verifies project setup
 
 ### Troubleshooting Hooks
 
@@ -263,11 +270,6 @@ If you get "ModuleNotFoundError: No module named 'scripts'":
    
    # Windows CMD
    set PYTHONPATH=%PYTHONPATH%;%CD%
-   ```
-3. Or create a `.env` file with:
-
-   ```ini
-   PYTHONPATH=${PYTHONPATH}:${PWD}
    ```
 
 To bypass hooks temporarily:

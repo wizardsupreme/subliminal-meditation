@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.3] - 2024-12-27
+
+### Summary
+These git commits focus on updating the documentation order in both the rules and README files. This change will impact the clarity and organization of the project's documentation, making it easier for users and contributors to navigate and understand the rules and guidelines for the project.
+
+### Documentation
+- docs: update documentation order in rules and README
+
 ## [0.2.2] - 2024-12-27
 
 ### Summary
