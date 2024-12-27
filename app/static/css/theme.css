@@ -1,0 +1,120 @@
+/* Theme transition */
+:root {
+    --transition-duration: 0.3s;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--primary-color);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 2px 8px var(--shadow);
+    transition: all var(--transition-duration) ease;
+    z-index: 1000;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+.theme-toggle:active {
+    transform: scale(0.9);
+}
+
+/* Light theme (default) */
+:root {
+    --primary-color: #7C4DFF;
+    --secondary-color: #B388FF;
+    --accent-color: #3F51B5;
+    --background-color: #FFFFFF;
+    --surface-color: #F5F5F5;
+    --text-primary: #212121;
+    --text-secondary: #757575;
+    --text-accent: #7C4DFF;
+    --border-color: #E0E0E0;
+    --shadow: rgba(0, 0, 0, 0.1);
+    --success: #4CAF50;
+    --warning: #FFC107;
+    --error: #F44336;
+    --info: #2196F3;
+}
+
+/* Dark theme */
+:root.dark-mode {
+    --primary-color: #B388FF;
+    --secondary-color: #7C4DFF;
+    --accent-color: #3F51B5;
+    --background-color: #121212;
+    --surface-color: #1E1E1E;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B0B0B0;
+    --text-accent: #B388FF;
+    --border-color: #333333;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --success: #81C784;
+    --warning: #FFD54F;
+    --error: #E57373;
+    --info: #64B5F6;
+}
+
+/* Apply theme colors */
+body {
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    transition: all var(--transition-duration) ease;
+}
+
+/* Additional theme-specific styles */
+.card,
+.modal-content {
+    background-color: var(--surface-color);
+    border-color: var(--border-color);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+/* Theme-specific text colors */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+}
+
+p, span {
+    color: var(--text-secondary);
+}
+
+a {
+    color: var(--text-accent);
+}
+
+/* Status colors */
+.text-success { color: var(--success) !important; }
+.text-warning { color: var(--warning) !important; }
+.text-danger { color: var(--error) !important; }
+.text-info { color: var(--info) !important; }
+
+/* Theme transition for images */
+img {
+    transition: filter var(--transition-duration) ease;
+}
+
+.dark-mode img:not([src*="dark"]) {
+    filter: brightness(0.8) contrast(1.2);
+} 
