@@ -432,4 +432,57 @@ docs(readme): update installation steps
 style: format with black
 ```
 
+## 🔒 CodeQL Security Analysis
+
+The project includes local CodeQL analysis in the pre-commit hooks. This helps catch potential security issues before they're committed.
+
+### Setting up CodeQL locally:
+
+1. Install the CodeQL CLI:
+   ```bash
+   # On Windows (using Chocolatey)
+   choco install codeql
+
+   # On macOS (using Homebrew)
+   brew install codeql
+
+   # On Linux (manual installation)
+   # Download from https://github.com/github/codeql-cli-binaries/releases
+   # Extract and add to PATH
+   ```
+
+2. Verify installation:
+   ```bash
+   codeql --version
+   ```
+
+### What gets analyzed:
+
+The CodeQL hook checks for:
+- Security vulnerabilities
+- Code quality issues
+- Common coding mistakes
+- Language-specific best practices
+
+Currently supported languages:
+- Python
+- JavaScript/TypeScript
+- Java
+- C/C++
+
+### Customizing CodeQL Analysis:
+
+You can customize the analysis by modifying `scripts/hooks/codeql-hook.py`:
+- Add/remove languages in the `create_database` function
+- Change query suites in the `run_analysis` function
+- Adjust severity thresholds
+- Add custom queries
+
+### Skipping CodeQL Analysis:
+
+For quick commits where CodeQL analysis isn't needed:
+```bash
+git commit --no-verify -m "your message"
+```
+
 

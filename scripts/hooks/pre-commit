@@ -458,6 +458,18 @@ def main():
         print(message)
         sys.exit(1)
 
+    # Run CodeQL analysis
+    try:
+        print_header("\nRunning CodeQL analysis...")
+        codeql_script = os.path.join(os.path.dirname(__file__), 'codeql-hook.py')
+        if os.path.exists(codeql_script):
+            subprocess.run([sys.executable, codeql_script], check=True)
+    except subprocess.CalledProcessError:
+        print_warning("CodeQL analysis failed. Please check the output above.")
+        sys.exit(1)
+    except FileNotFoundError:
+        print_warning("CodeQL hook not found. Skipping CodeQL analysis.")
+
     print(f"\n{GREEN}✨ All pre-commit checks and fixes completed successfully!{RESET}")
 
 if __name__ == "__main__":
