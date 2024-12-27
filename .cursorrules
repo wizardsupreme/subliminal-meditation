@@ -8,6 +8,22 @@
 - Maximum line length: 100 characters
 - Use meaningful variable and function names
 
+## OpenAI Integration
+- Initialize OpenAI client with httpx configuration:
+  ```python
+  client = OpenAI(
+      api_key=os.getenv('OPENAI_API_KEY'),
+      http_client=httpx.Client(
+          base_url="https://api.openai.com/v1",
+          timeout=60.0,
+      )
+  )
+  ```
+- Always use python-dotenv to load environment variables
+- Set appropriate timeouts for API calls
+- Handle API errors gracefully
+- Log API errors without exposing sensitive data
+
 ## Security Standards
 - No hardcoded secrets or credentials
 - Use environment variables for sensitive data
