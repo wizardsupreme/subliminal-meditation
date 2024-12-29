@@ -221,8 +221,9 @@ def fix_python_style(file_path: str) -> bool:
             
             # Check if we should be indented
             elif indent_stack and current_indent <= indent_stack[-1]:
-                # This line should be indented
-                if not stripped.startswith(('except', 'else:', 'elif')):
+                # Don't modify indentation for except/else/elif blocks
+                # or route decorators or function definitions after them
+                if not (stripped.startswith(('except', 'else:', 'elif', '@bp.route', 'def '))):
                     new_indent = indent_stack[-1] + 4
                     if current_indent != new_indent:
                         lines[i] = ' ' * new_indent + line.lstrip()
@@ -238,157 +239,14 @@ def fix_python_style(file_path: str) -> bool:
             
             i += 1
         
-        # Fix malformed with statements
-        i = 0
-        while i < len(lines):
-            line = lines[i].strip()
-            
-            # Look for malformed with statements
-            if 'with' in line and '=' in line and 'as' in line:
-                # Fix cases where 'with' and 'as' are on the same line but malformed
-                parts = line.split('=', 1)
-                if len(parts) == 2:
-                    var_name = parts[0].strip()
-                    expr = parts[1].strip()
-                    if expr.startswith('with'):
-                        # Remove 'with' from expression
-                        expr = expr.replace('with', '', 1).strip()
-                        # Fix the line
-                        lines[i] = f"with {expr}"
-                        modified = True
-            
-            # Fix misplaced 'as' clauses
-            if line.endswith('as'):
-                next_line = lines[i + 1].strip() if i + 1 < len(lines) else ''
-                if next_line and not next_line.startswith('as'):
-                    # Join the lines correctly
-                    lines[i] = f"{line} {next_line}"
-                    lines[i + 1] = ''
-                    modified = True
-            
-            # Fix indentation in with blocks
-            if line.startswith('with') and ':' not in line:
-                j = i + 1
-                while j < len(lines) and (not lines[j].strip() or lines[j].startswith(' ')):
-                    if lines[j].strip():
-                        indent = len(lines[j]) - len(lines[j].lstrip())
-                        lines[j] = ' ' * (indent + 4) + lines[j].lstrip()
-                        modified = True
-                    j += 1
-            
-            i += 1
-        
-        # Fix subprocess.Popen without 'with'
-        i = 0
-        while i < len(lines):
-            line = lines[i].strip()
-            
-            # Look for subprocess.Popen patterns
-            if 'subprocess.Popen(' in line or 'Popen(' in line:
-                indent = len(lines[i]) - len(lines[i].lstrip())
-                indent_str = ' ' * indent
-                
-                # Extract the Popen call and its arguments
-                if '=' in line:
-                    var_name = line.split('=')[0].strip()
-                    # Find the end of the Popen call
-                    j = i
-                    popen_lines = []
-                    paren_count = line.count('(') - line.count(')')
-                    while paren_count > 0 and j < len(lines):
-                        popen_lines.append(lines[j])
-                        j += 1
-                        if j < len(lines):
-                            paren_count += lines[j].count('(') - lines[j].count(')')
-                    
-                    # Convert to 'with' context manager
-                    if not any('with' in l for l in lines[max(0, i-1):i+1]):
-                        popen_code = '\n'.join(popen_lines)
-                        new_lines = [
-                            f"{indent_str}with {popen_code} as {var_name}:",
-                        ]
-                        
-                        # Find the block of code using the process
-                        k = j
-                        while k < len(lines) and (
-                            k == j or 
-                            len(lines[k].strip()) == 0 or 
-                            len(lines[k]) - len(lines[k].lstrip()) > indent
-                        ):
-                            if var_name in lines[k] and 'with' not in lines[k]:
-                                new_lines.append(f"{indent_str}    {lines[k].strip()}")
-                                lines[k] = ''
-                            k += 1
-                        
-                        lines[i:j] = new_lines
-                        modified = True
-                        i = k
-                        continue
-            i += 1
-        
-        # Fix empty imports
-        for i, line in enumerate(lines):
-            # Fix empty typing imports
-            if line.strip() == 'from typing import':
-                lines[i] = ''
-                modified = True
-            # Fix trailing whitespace
-            stripped = line.rstrip()
-            if stripped != line:
-                lines[i] = stripped
-                modified = True
-        
-        # Remove unused imports
-        import_pattern = r'^from\s+(\w+)\s+import\s+([^#\n]+)'
-        for i, line in enumerate(lines):
-            if match := re.match(import_pattern, line):
-                module, imports = match.groups()
-                imports = [imp.strip() for imp in imports.split(',')]
-                
-                # Check each import
-                used_imports = []
-                for imp in imports:
-                    # Simple check if import is used anywhere in the file
-                    is_used = any(
-                        imp in other_line and not other_line.startswith('from')
-                        for other_line in lines[i+1:]
-                    )
-                    if is_used:
-                        used_imports.append(imp)
-                
-                if len(used_imports) != len(imports):
-                    if used_imports:
-                        lines[i] = f"from {module} import {', '.join(used_imports)}"
-                    else:
-                        lines[i] = ''  # Remove the entire import if nothing is used
-                    modified = True
-        
-        # Remove consecutive blank lines
-        new_lines = []
-        prev_empty = False
-        for line in lines:
-            if line.strip():
-                new_lines.append(line)
-                prev_empty = False
-            elif not prev_empty:
-                new_lines.append(line)
-                prev_empty = True
-        if new_lines != lines:
-            lines = new_lines
-            modified = True
-        
         if modified:
-            # Join lines and ensure single newline at end
-            content = '\n'.join(line for line in lines if line.strip() or prev_empty) + '\n'
-            with open(file_path, 'w', encoding='utf-8', newline='\n') as f:
-                f.write(content)
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write('\n'.join(lines) + '\n')
             subprocess.run(['git', 'add', file_path], check=True)
-            print_success(f"Fixed style issues in {format_path(file_path)}")
-            return True
-        
-        return False
+            
+        return modified
     except Exception as e:
-        print_warning(f"Error fixing style in {file_path}: {e}")
+        print(f"Error fixing Python style in {file_path}: {e}")
         return False
 
 def fix_pylint_issues(file_path: str) -> bool:
